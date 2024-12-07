@@ -121,11 +121,24 @@ router.put('/auctions/:id', verifyToken, async (req, res, err) => {
     }
     await mongo.collection('auctions').updateOne(changes, auction);
     res.json(auction);
-  }
-  else{
+  } else {
     res.status(400).send(err);
   }
 });
+
+router.get('/signout', verifyToken, (req, res) => {
+  res.cookie("token", '', {
+    httpOnly: true,
+    expires: new Date(0)
+  });
+  res.status(200).send('Successfully signed out!');
+})
+
+function isAuctionOpen(auction) {
+  const now = new Date();
+  return now.getTime() < auction.endTime.getTime();
+
+}
 
 
 const generateId = () => Math.floor(10000 + Math.random() * 90000);

@@ -14,7 +14,7 @@
 
     <!-- Bottone Login/Signup -->
     <div v-if="!authenticated && !showLoginForm">
-        <button @click="toggleLoginForm">Login/Signup</button>
+        <button @click="toggleLoginForm">Signin/Signup</button>
     </div>
 
     <!-- Sezione Login/Signup -->
@@ -37,6 +37,8 @@
         <button @click="toggleLoginForm">Back</button>
     </div>
 
+
+
     <!-- Elenco Aste -->
     <div v-if="!showLoginForm">
         <h2>Auctions</h2>
@@ -44,15 +46,18 @@
         <ul>
             <li v-for="auction in auctions" :key="auction.id">
                 <strong>{{ auction.title }}</strong><br>
-                {{ auction.description }}
+                {{ auction.description }} <br>
+                Current Price: {{ auction.currentPrice }} € <br>
+                Auction ends on: {{ formatDate(auction.endTime) }} <br>
+                Status: {{ auction.status }} <br>
             </li>
         </ul>
     </div>
 
     <!-- Dashboard Utente -->
     <div v-if="authenticated">
-        <h2>Benvenuto, {{ userInfo.username }}</h2>
-        <button class="logout-button" @click="logout">Logout</button>
+        <h2>Welcome, {{ userInfo.username }}</h2>
+        <button class="logout-button" @click="signout">Signout</button>
 
         <!-- Creazione Nuova Asta -->
         <h2>Crea Asta</h2>

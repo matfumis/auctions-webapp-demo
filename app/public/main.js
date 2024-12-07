@@ -17,6 +17,11 @@ const app = Vue.createApp({
         password: ''
       },
       auctions: [],
+      filters: {
+        title: '',
+        status: '',
+        endTime:''
+      },
       newAuction: {
         title: '',
         description: '',
@@ -36,6 +41,7 @@ const app = Vue.createApp({
     toggleLoginForm() {
       this.showLoginForm = !this.showLoginForm;
     },
+
     async signin() {
       try {
         const response = await fetch('/api/auth/signin', {
@@ -51,8 +57,7 @@ const app = Vue.createApp({
         }
         this.showLoginForm = false;
         await this.checkAuthentication();
-        alert(response);
-        await this.getUserInfo();
+        await this.checkAuthentication();
       } catch (error) {
         console.error('Login error:', error);
       }
@@ -104,6 +109,7 @@ const app = Vue.createApp({
         console.error('Error while retrieving auctions:', error);
       }
     },
+
     async createAuction() {
       try {
         const response = await fetch('/api/auctions', {
@@ -120,6 +126,34 @@ const app = Vue.createApp({
       } catch (error) {
         console.error('Error while creating auction:', error);
       }
+    },
+
+    async signout(){
+        await fetch('/api/signout', {
+          method : 'GET',
+          credentials: 'include'
+        })
+          .then(response => {
+            if (response.ok) {
+              this.authenticated = false;
+              this.userInfo = {};
+            } else {
+              console.error('Error while signing out');
+            }
+          })
+          .catch(error => {
+            console.error('Error while signing out', error);
+          });
+    },
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-EN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     },
 
   }

@@ -47,6 +47,11 @@ button {
     color: white;
     cursor: pointer;
     border: none;
+    max-width: 30%;
+    position: relative;
+    -ms-transform: translateX(-50%);
+    transform: translateX(-50%);
+    left: 50%
 }
 
 button:hover {
