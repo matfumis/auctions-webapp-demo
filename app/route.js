@@ -24,16 +24,16 @@ router.get('/users/:id', async (req, res) => {
   res.json({id, username, name, surname, winningBids});
 });
 
-router.get('/users/', async (req, res) => {
+router.get('/users', async (req, res) => {
   const mongo = await db.connectToDb();
   const query = req.query.q;
 
   const filter = query
     ? {
       $or: [
-        {name: {$regex: `^${query}`, $options: 'i'}},
-        {surname: {$regex: `^${query}`, $options: 'i'}},
-        {username: {$regex: `^${query}`, $options: 'i'}}
+        {name: {$regex: `${query}`, $options: 'i'}},
+        {surname: {$regex: `${query}`, $options: 'i'}},
+        {username: {$regex: `${query}`, $options: 'i'}}
       ]
     }
     : {};
@@ -42,15 +42,15 @@ router.get('/users/', async (req, res) => {
   res.json(users);
 });
 
-router.get('/auctions/', async (req, res) => {
+router.get('/auctions', async (req, res) => {
   const mongo = await db.connectToDb();
   const query = req.query.q;
 
   const filter = query
     ? {
       $or: [
-        {title: {$regex: `^${query}`, $options: 'i'}},
-        {description: {$regex: `^${query}`, $options: 'i'}}
+        {title: {$regex: `${query}`, $options: 'i'}},
+        {description: {$regex: `${query}`, $options: 'i'}}
       ]
     }
     : {};

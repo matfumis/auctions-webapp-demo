@@ -37,37 +37,62 @@
         <button @click="toggleLoginForm">Back</button>
     </div>
 
-    <!--    -->
-    <!--    &lt;!&ndash; Elenco Aste &ndash;&gt;-->
-    <!--    <div v-if="!showLoginForm">-->
-    <!--        <h2>Auctions</h2>-->
-    <!--        <button @click="fetchAuctions">Refresh auctions</button>-->
-    <!--        <ul>-->
-    <!--            <li v-for="auction in auctions" :key="auction.id">-->
-    <!--                <strong>{{ auction.title }}</strong><br>-->
-    <!--                {{ auction.description }} <br>-->
-    <!--                Current Price: {{ auction.currentPrice }} € <br>-->
-    <!--                Auction ends on: {{ formatDate(auction.endTime) }} <br>-->
-    <!--                Status: {{ auction.status }} <br>-->
-    <!--            </li>-->
-    <!--        </ul>-->
-    <!--    </div>-->
+    <!-- Dashboard Utente -->
+    <div v-if="authenticated">
+        <h2>Welcome, {{ userInfo.username }}</h2>
+        <button class="logout-button" @click="signout">Sign out</button>
 
-        <!-- Dashboard Utente -->
-        <div v-if="authenticated">
-            <h2>Welcome, {{ userInfo.username }}</h2>
-            <button class="logout-button" @click="signout">Sign out</button>
+        <!--        &lt;!&ndash; Creazione Nuova Asta &ndash;&gt;-->
+        <!--        <h2>Crea Asta</h2>-->
+        <!--        <form @submit.prevent="createAuction">-->
+        <!--            <label>Title: <input type="text" v-model="newAuction.title" required/></label>-->
+        <!--            <label>Description: <textarea v-model="newAuction.description" required></textarea></label>-->
+        <!--            <label>Starting price: <textarea v-model="newAuction.startPrice" required></textarea></label>-->
+        <!--            <label>End Time: <textarea v-model="newAuction.endTime" required></textarea></label>-->
+        <!--            <button type="submit">Create</button>-->
+        <!--        </form>-->
+    </div>
 
-    <!--        &lt;!&ndash; Creazione Nuova Asta &ndash;&gt;-->
-    <!--        <h2>Crea Asta</h2>-->
-    <!--        <form @submit.prevent="createAuction">-->
-    <!--            <label>Title: <input type="text" v-model="newAuction.title" required/></label>-->
-    <!--            <label>Description: <textarea v-model="newAuction.description" required></textarea></label>-->
-    <!--            <label>Starting price: <textarea v-model="newAuction.startPrice" required></textarea></label>-->
-    <!--            <label>End Time: <textarea v-model="newAuction.endTime" required></textarea></label>-->
-    <!--            <button type="submit">Create</button>-->
-    <!--        </form>-->
-        </div>
+
+    <!-- Elenco Aste -->
+    <div v-if="!showLoginForm">
+        <h2>Auctions</h2>
+        <!-- <button @click="fetchAuctions">Fetch auctions</button> -->
+        <form @submit.prevent="fetchAuctions">
+            <label>
+                <input type="text" v-model="auctionsQuery" placeholder="Search in auctions..."/>
+            </label>
+            <button type="submit">Search auctions</button>
+        </form>
+        <ul>
+            <li v-for="auction in auctions" :key="auction.id">
+                <strong>{{ auction.title }}</strong><br>
+                {{ auction.description }} <br>
+                Current Price: {{ auction.currentPrice }} € <br>
+                Auction ends on: {{ formatDate(auction.endTime) }} <br>
+                Status: {{ auction.status }} <br>
+            </li>
+        </ul>
+    </div>
+
+    <div v-if="!showLoginForm">
+        <h2>Users</h2>
+        <form @submit.prevent="fetchUsers">
+            <label>
+                <input type="text" v-model="usersQuery" placeholder="Search users..."/>
+            </label>
+            <button type="submit">Search users</button>
+        </form>
+<!--        <button @click="fetchUsers">Search users</button>-->
+        <ul>
+            <li v-for="user in users" :key="user.id">
+                <strong>{{ user.username }}</strong><br>
+                Name: {{ user.name }} {{ user.surname }} <br>
+            </li>
+        </ul>
+    </div>
+
+
 </div>
 </body>
 </html>

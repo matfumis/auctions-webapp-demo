@@ -6,6 +6,8 @@ const app = createApp({
     return {
       authenticated: false,
       userInfo: {},
+      auctions: {},
+      users: {},
       signinData: {
         username: '',
         password: ''
@@ -17,17 +19,34 @@ const app = createApp({
         password: ''
       },
       showLoginForm: false,
+      showAuctionsFilters: false,
+      auctionsQuery: '',
+      usersQuery: ''
     }
   },
 
   mounted() {
-    this.showUserInfo();
+    this.fetchUserInfo();
+    this.fetchAuctions();
+    // this.fetchUsers();
   },
 
   methods: {
 
     toggleLoginForm() {
       this.showLoginForm = !this.showLoginForm;
+    },
+
+    toggleAuctionsFilters() {
+      this.showAuctionsFilters = !this.showAuctionsFilters;
+    },
+
+    emptyAuctionsQuery(){
+      this.auctionsQuery = '';
+    },
+
+    emptyUsersQuery(){
+      this.usersQuery = '';
     },
 
     signup: function () {
@@ -88,23 +107,78 @@ const app = createApp({
       })
     },
 
-    async showUserInfo() {
+    async fetchUserInfo() {
       fetch('/api/whoami', {
-          method: 'GET',
-          credentials: 'include' // Include i cookie nelle richieste
-        }).then(async res => {
-          if (res.ok) {
-            this.authenticated = true;
-            this.userInfo = await res.json();
-          }
-          else{
-            this.authenticated = false;
-            this.userInfo = {};
-          }
+        method: 'GET',
+        credentials: 'include' // Include i cookie nelle richieste
+      }).then(async res => {
+        if (res.ok) {
+          this.authenticated = true;
+          this.userInfo = await res.json();
+        } else {
+          this.authenticated = false;
+          this.userInfo = {};
+        }
       }).catch(err => {
         console.log(err);
       })
     },
+
+    async fetchAuctions() {
+      if (this.auctionsQuery === '') {
+        fetch('/api/auctions', {
+          method: 'GET'
+        }).then(async res => {
+          this.auctions = await res.json();
+        }).catch(err => {
+          console.log(err);
+        })
+      }
+      else {
+        fetch(`/api/auctions?q=${encodeURIComponent(this.auctionsQuery)}`, {
+          method: 'GET'
+        }).then(async res => {
+          this.auctions = await res.json();
+          this.emptyAuctionsQuery();
+        }).catch(err => {
+          console.log(err);
+        })
+      }
+    },
+
+    async fetchUsers() {
+      if (this.usersQuery === '') {
+        fetch('/api/users', {
+          method: 'GET'
+        }).then(async res => {
+          this.users = await res.json();
+        }).catch(err => {
+          console.log(err);
+        })
+      }
+      else {
+        fetch(`/api/users?q=${encodeURIComponent(this.usersQuery)}`, {
+          method: 'GET'
+        }).then(async res => {
+          this.users = await res.json();
+          this.emptyUsersQuery();
+        }).catch(err => {
+          console.log(err);
+        })
+      }
+    },
+
+    formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-EN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    },
+
 
   }
 });
