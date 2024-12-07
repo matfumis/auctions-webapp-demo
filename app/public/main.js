@@ -4,9 +4,8 @@ const app = Vue.createApp({
   data() {
     return {
       authenticated: false,
-      token: null,
       userInfo: {},
-      loginData: {
+      signinData: {
         username: '',
         password: ''
       },
@@ -33,7 +32,7 @@ const app = Vue.createApp({
   },
   mounted() {
     // Controlla se l'utente è già autenticato
-    this.checkAuthentication();
+    this.showUserInfo();
     // Carica subito l'elenco delle aste pubbliche
     this.fetchAuctions();
   },
@@ -41,7 +40,7 @@ const app = Vue.createApp({
     toggleLoginForm() {
       this.showLoginForm = !this.showLoginForm;
     },
-
+  /*
     async signin() {
       try {
         const response = await fetch('/api/auth/signin', {
@@ -49,19 +48,48 @@ const app = Vue.createApp({
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify(this.loginData)
+          credentials: 'include',
+          body: JSON.stringify(this.signinData)
         });
 
-        if (!response.ok){
-          throw new Error('Login failed');
+        if (!response.ok) {
+          throw new Error('Signin failed');
         }
-        this.showLoginForm = false;
-        await this.checkAuthentication();
-        await this.checkAuthentication();
+
+        alert('Successfully signed in');
       } catch (error) {
-        console.error('Login error:', error);
+        console.error('Signin error:', error);
       }
     },
+
+   */
+    signin() {
+      fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // credentials: 'include', // Necessario per includere i cookie
+        body: JSON.stringify({
+          email: this.signinData.username,
+          password: this.signinData.password,
+        }),
+      })
+        .then(async response => {
+          if (response.ok) {
+            // Aggiorna lo stato dell'utente
+            this.authenticated = true;
+
+            alert('Login effettuato con successo!');
+          } else {
+            // Mostra un messaggio d'errore
+            alert('Credenziali errate o login fallito.');
+          }
+        })
+        .catch(error => {
+          console.error('Errore durante il login:', error);
+          alert('Errore durante il login.');
+        });
+    },
+
     async signup() {
       try {
         const response = await fetch('/api/auth/signup', {
@@ -81,7 +109,7 @@ const app = Vue.createApp({
         console.error('Signup error:', error);
       }
     },
-    async checkAuthentication() {
+    async showUserInfo() {
       try {
         const response = await fetch('/api/whoami', {
           method: 'GET',

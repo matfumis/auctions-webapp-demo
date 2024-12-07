@@ -6,7 +6,7 @@
     <title>Auctions App</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js" defer></script>
-    <script src="main.js" defer></script>
+    <script src="main2.js" defer></script>
 </head>
 <body>
 <div id="app">
@@ -14,61 +14,60 @@
 
     <!-- Bottone Login/Signup -->
     <div v-if="!authenticated && !showLoginForm">
-        <button @click="toggleLoginForm">Signin/Signup</button>
+        <button @click="toggleLoginForm">Sign in / Sign up</button>
     </div>
 
     <!-- Sezione Login/Signup -->
     <div v-if="showLoginForm">
-        <h2>Login</h2>
+        <h2>Sign in</h2>
         <form @submit.prevent="signin">
-            <label>Username: <input type="text" v-model="loginData.username" required /></label>
-            <label>Password: <input type="password" v-model="loginData.password" required /></label>
-            <button type="submit">Login</button>
+            <label>Username: <input type="text" v-model="signinData.username" required/></label>
+            <label>Password: <input type="password" v-model="signinData.password" required/></label>
+            <button type="submit">Sign in</button>
         </form>
 
         <h2>Sign up</h2>
         <form @submit.prevent="signup">
-            <label>Username: <input type="text" v-model="signupData.username" required /></label>
-            <label>Name: <input type="text" v-model="signupData.name" required /></label>
-            <label>Surname: <input type="text" v-model="signupData.surname" required /></label>
-            <label>Password: <input type="password" v-model="signupData.password" required /></label>
-            <button type="submit">Signup</button>
+            <label>Username: <input type="text" v-model="signupData.username" required/></label>
+            <label>Name: <input type="text" v-model="signupData.name" required/></label>
+            <label>Surname: <input type="text" v-model="signupData.surname" required/></label>
+            <label>Password: <input type="password" v-model="signupData.password" required/></label>
+            <button type="submit">Sign up</button>
         </form>
         <button @click="toggleLoginForm">Back</button>
     </div>
 
+    <!--    -->
+    <!--    &lt;!&ndash; Elenco Aste &ndash;&gt;-->
+    <!--    <div v-if="!showLoginForm">-->
+    <!--        <h2>Auctions</h2>-->
+    <!--        <button @click="fetchAuctions">Refresh auctions</button>-->
+    <!--        <ul>-->
+    <!--            <li v-for="auction in auctions" :key="auction.id">-->
+    <!--                <strong>{{ auction.title }}</strong><br>-->
+    <!--                {{ auction.description }} <br>-->
+    <!--                Current Price: {{ auction.currentPrice }} € <br>-->
+    <!--                Auction ends on: {{ formatDate(auction.endTime) }} <br>-->
+    <!--                Status: {{ auction.status }} <br>-->
+    <!--            </li>-->
+    <!--        </ul>-->
+    <!--    </div>-->
 
+        <!-- Dashboard Utente -->
+        <div v-if="authenticated">
+            <h2>Welcome, {{ userInfo.username }}</h2>
+            <button class="logout-button" @click="signout">Sign out</button>
 
-    <!-- Elenco Aste -->
-    <div v-if="!showLoginForm">
-        <h2>Auctions</h2>
-        <button @click="fetchAuctions">Refresh auctions</button>
-        <ul>
-            <li v-for="auction in auctions" :key="auction.id">
-                <strong>{{ auction.title }}</strong><br>
-                {{ auction.description }} <br>
-                Current Price: {{ auction.currentPrice }} € <br>
-                Auction ends on: {{ formatDate(auction.endTime) }} <br>
-                Status: {{ auction.status }} <br>
-            </li>
-        </ul>
-    </div>
-
-    <!-- Dashboard Utente -->
-    <div v-if="authenticated">
-        <h2>Welcome, {{ userInfo.username }}</h2>
-        <button class="logout-button" @click="signout">Signout</button>
-
-        <!-- Creazione Nuova Asta -->
-        <h2>Crea Asta</h2>
-        <form @submit.prevent="createAuction">
-            <label>Title: <input type="text" v-model="newAuction.title" required/></label>
-            <label>Description: <textarea v-model="newAuction.description" required></textarea></label>
-            <label>Starting price: <textarea v-model="newAuction.startPrice" required></textarea></label>
-            <label>End Time: <textarea v-model="newAuction.endTime" required></textarea></label>
-            <button type="submit">Create</button>
-        </form>
-    </div>
+    <!--        &lt;!&ndash; Creazione Nuova Asta &ndash;&gt;-->
+    <!--        <h2>Crea Asta</h2>-->
+    <!--        <form @submit.prevent="createAuction">-->
+    <!--            <label>Title: <input type="text" v-model="newAuction.title" required/></label>-->
+    <!--            <label>Description: <textarea v-model="newAuction.description" required></textarea></label>-->
+    <!--            <label>Starting price: <textarea v-model="newAuction.startPrice" required></textarea></label>-->
+    <!--            <label>End Time: <textarea v-model="newAuction.endTime" required></textarea></label>-->
+    <!--            <button type="submit">Create</button>-->
+    <!--        </form>-->
+        </div>
 </div>
 </body>
 </html>
