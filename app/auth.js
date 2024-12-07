@@ -27,18 +27,18 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-router.post('/login', async (req, res) => {
+router.post('/signin', async (req, res) => {
   try {
     const {username, password} = req.body;
-
+    console.log(req.body);
     const mongo = await db.connectToDb();
     const user = await mongo.collection("users").findOne({username: username});
 
     if (await areUsernameAndPasswordValid(username, password, mongo)) {
       const data = {id: user.id}
-      const token = jwt.sign(data, secret, {expiresIn: '24h'});
+      const token = jwt.sign(data, secret, {expiresIn: 86400});
       res.cookie("token", token, {httpOnly: true});
-      res.json("Authenticated!");
+      res.status(200).send(token);
     } else {
       res.status(401).send("Invalid username or password!");
     }
