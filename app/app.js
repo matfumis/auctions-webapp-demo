@@ -14,7 +14,6 @@ app.use(express.static("public"));
 app.use('/api/auth', auth);
 app.use('/api', router);
 
-
 app.listen(port, () => {
   console.log(`Web server started on port ${port}`);
 });

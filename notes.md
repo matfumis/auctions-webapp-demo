@@ -1,8 +1,19 @@
 # Note
 
+## Controllo temporale aste
+
+- Rimuovere attributo `status` dalle aste
+  - sarà calcolato e mostrato in frontend, aggiornato a ogni refresh 
+    - o refresh della pagina o chiamata esplicita di showAuctions con bottone
+    
+- Creare middleware da anteporre alla `PUT` dell'asta
+  - il middleware chiama next se `auction.endDate - now > 0`, sennò errore
+
+
 ## Collezioni database
 1. `users`
 2. `auctions`
+3. `bids`? Per un unica api che richiede i dettagli di un asta
 
 ### Proprietà `users`
 

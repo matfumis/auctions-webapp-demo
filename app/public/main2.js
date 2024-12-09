@@ -18,8 +18,15 @@ const app = createApp({
         surname: '',
         password: ''
       },
+      newAuction: {
+        title: '',
+        description: '',
+        startPrice: '',
+        endTime: ''
+      },
       showLoginForm: false,
       showAuctionsFilters: false,
+      showNewAuctionForm: false,
       auctionsQuery: '',
       usersQuery: ''
     }
@@ -41,11 +48,15 @@ const app = createApp({
       this.showAuctionsFilters = !this.showAuctionsFilters;
     },
 
-    emptyAuctionsQuery(){
+    toggleNewAuctionForm() {
+      this.showNewAuctionForm = !this.showNewAuctionForm;
+    },
+
+    emptyAuctionsQuery() {
       this.auctionsQuery = '';
     },
 
-    emptyUsersQuery(){
+    emptyUsersQuery() {
       this.usersQuery = '';
     },
 
@@ -133,8 +144,7 @@ const app = createApp({
         }).catch(err => {
           console.log(err);
         })
-      }
-      else {
+      } else {
         fetch(`/api/auctions?q=${encodeURIComponent(this.auctionsQuery)}`, {
           method: 'GET'
         }).then(async res => {
@@ -142,7 +152,7 @@ const app = createApp({
           this.emptyAuctionsQuery();
         }).catch(err => {
           console.log(err);
-        })
+        });
       }
     },
 
@@ -154,9 +164,8 @@ const app = createApp({
           this.users = await res.json();
         }).catch(err => {
           console.log(err);
-        })
-      }
-      else {
+        });
+      } else {
         fetch(`/api/users?q=${encodeURIComponent(this.usersQuery)}`, {
           method: 'GET'
         }).then(async res => {
@@ -164,8 +173,30 @@ const app = createApp({
           this.emptyUsersQuery();
         }).catch(err => {
           console.log(err);
-        })
+        });
       }
+    },
+
+    createAuction() {
+      fetch('/api/auctions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(this.newAuction)
+      }).then(async res => {
+        const message = await res.text();
+        if (res.ok) {
+          alert(message);
+          // this.newAuction = await res.json();
+          await this.fetchAuctions();
+          this.toggleNewAuctionForm();
+        } else {
+          alert(message);
+        }
+      }).catch(err => {
+        console.log(err);
+      });
     },
 
     formatDate(dateString) {
