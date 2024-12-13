@@ -24,11 +24,17 @@ const app = createApp({
         startPrice: '',
         endTime: ''
       },
+      newBid: {
+        amount: '0'
+      },
+      auctionsQuery: '',
+      usersQuery: '',
+      selectedAuction: '',
+
       showLoginForm: false,
       showAuctionsFilters: false,
       showNewAuctionForm: false,
-      auctionsQuery: '',
-      usersQuery: ''
+      showNewBidForm: false,
     }
   },
 
@@ -44,12 +50,12 @@ const app = createApp({
       this.showLoginForm = !this.showLoginForm;
     },
 
-    toggleAuctionsFilters() {
-      this.showAuctionsFilters = !this.showAuctionsFilters;
-    },
-
     toggleNewAuctionForm() {
       this.showNewAuctionForm = !this.showNewAuctionForm;
+    },
+
+    toggleNewBidForm(auctionId) {
+      this.selectedAuction = this.selectedAuction === auctionId ? null : auctionId;
     },
 
     emptyAuctionsQuery() {
@@ -71,9 +77,10 @@ const app = createApp({
         const message = await res.text();
         if (res.ok) {
           alert(message);
-          // sarà da nascondere il form di sign up e lasciare solo quello di sign in
+          this.signupData = ''
         } else {
           alert(message);
+          this.signupData = ''
         }
       }).catch(err => {
         console.log(err);
@@ -93,9 +100,11 @@ const app = createApp({
         if (res.ok) {
           this.authenticated = true;
           this.toggleLoginForm();
+          this.signinData = '';
           alert(message);
         } else {
           alert(message);
+          this.signinData = '';
         }
       }).catch(err => {
         console.log(err);
@@ -104,7 +113,8 @@ const app = createApp({
 
     signout: function () {
       fetch('/api/signout', {
-        method: 'GET'
+        method: 'GET',
+        credentials: 'include'
       }).then(async res => {
         const message = await res.text();
         if (res.ok) {
@@ -121,7 +131,7 @@ const app = createApp({
     async fetchUserInfo() {
       fetch('/api/whoami', {
         method: 'GET',
-        credentials: 'include' // Include i cookie nelle richieste
+        credentials: 'include'
       }).then(async res => {
         if (res.ok) {
           this.authenticated = true;
@@ -199,6 +209,31 @@ const app = createApp({
       });
     },
 
+    makeNewBid() {
+      fetch(`/api/auctions/${encodeURIComponent(this.selectedAuction)}/bids`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(this.newBid)
+      }).then(async res => {
+        const message = await res.text();
+        if (res.ok) {
+          alert(message);
+          this.toggleNewBidForm();
+          this.newBid = '0';
+          await this.fetchAuctions();
+        } else {
+          alert(message);
+          this.newBid = '0';
+          await this.fetchAuctions();
+        }
+      }).catch(err => {
+        console.log(err);
+      })
+    },
+
     formatDate(dateString) {
       const date = new Date(dateString);
       return date.toLocaleDateString('en-EN', {
@@ -210,6 +245,11 @@ const app = createApp({
       });
     },
 
+    isAuctionOpen(date) {
+      const now = new Date();
+      const endTime = new Date(date);
+      return now < endTime;
+    },
 
   }
 });

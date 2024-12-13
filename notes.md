@@ -1,16 +1,31 @@
 # Note
 
+## To-Do
+
+- [x] mostrare bottone per fare offerta (o colore diverso) solo per utenti autenticati
+- [x] sistemare form offerta
+- [x] assegnare vincitore aste
+- [ ] mostrare status asta calcolato
+    - se asta chiusa, mostrare username utente vincente
+- [ ] mostrare prima aste aperte e quelle chiuse
+- [ ] espandere dettagli asta
+- [ ] decisione su collezione `bids`
+- [ ] inserire try-catch backend
+- [ ] aggiungere filtro asta (aperta/chiusa)
+- [ ] migliorare frontend (bootstrap?)
+- [ ] riorganizzare cartelle
+
 ## Controllo temporale aste
 
 - Rimuovere attributo `status` dalle aste
-  - sarà calcolato e mostrato in frontend, aggiornato a ogni refresh 
-    - o refresh della pagina o chiamata esplicita di showAuctions con bottone
-    
-- Creare middleware da anteporre alla `PUT` dell'asta
-  - il middleware chiama next se `auction.endDate - now > 0`, sennò errore
+    - sarà calcolato e mostrato in frontend, aggiornato a ogni refresh
+        - o refresh della pagina o chiamata esplicita di showAuctions con bottone
 
+- Creare middleware da anteporre alla `PUT` dell'asta
+    - il middleware chiama next se `auction.endDate - now > 0`, sennò errore
 
 ## Collezioni database
+
 1. `users`
 2. `auctions`
 3. `bids`? Per un unica api che richiede i dettagli di un asta
@@ -18,32 +33,30 @@
 ### Proprietà `users`
 
 ```json
-"id": "user123", // uso l'id di default?
-"name": "zio"
-"surname": "pera",
-"username": "john_doe",
-// "email": "john@example.com", // sarebbe figo implementare un sistema di notifiche
-"passwordHash": "hashed_password", // ricorda di implementare l'hash
-// "role": "bidder", // bidder, seller o admin
+"id": 
+"name": 
+"surname": 
+"username": 
+"passwordHash": 
 "winningBids": [
-        { "auctionId": "auction567", "amount": 100, "timestamp": "2024-11-28T12:30:00Z" }
-    ]
+{"auctionId": , "amount":, "timestamp": }
+]
 ```
 
 ### Proprietà `auctions`
 
 ```json
-"_id": "auction567",
-"title": "titolo asta/oggetto",
-"description": "Descrizione oggetto",
-"sellerId": "user123", // riferito all'utente venditore
-"startPrice": 0, 
-"currentPrice": 0, 
-"startTime": "2024-11-27T10:00:00Z",
-"endTime": "2024-12-01T10:00:00Z",
+"id": ,
+"title": ,
+"description": ,
+"sellerId": , 
+"startPrice": ,
+"currentPrice": ,
+"startTime": ,
+"endTime": ,
 "bidsHistory": [
-        { "bidderId": "user456", "amount": 0, "timestamp": "2024-11-27T11:00:00Z" },
-        { "bidderId": "user789", "amount": 0, "timestamp": "2024-11-28T15:30:00Z" }
-        ],
-"status": "stato asta", // open, closed
+{"bidderId": , "amount": , "timestamp": 
+},
+
+]
 ```
