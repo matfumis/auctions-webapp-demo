@@ -28,27 +28,47 @@ const verifyAuthentication = (req, res, next) => {
   });
 };
 
+const updateAuctionStatus = async (req, res, next) => {
+  const now = new Date();
+  const expiredAuctions = await req.db.collection('auctions').find({endTime: {$lt: now}, open: true}).toArray();
+  for (const auction of expiredAuctions) {
+    const changes = {
+      open: false
+    }
+    await req.db.collection('auctions').updateOne({id: auction.id}, {$set: changes});
+
+    const winnerId = auction.bidsHistory[auction.bidsHistory.length - 1].bidder;
+    const highestBid = (auction.bidsHistory[auction.bidsHistory.length - 1]);
+
+    const winningBid = {
+      item: auction.title,
+      amount: highestBid.amount,
+      timestamp: highestBid.timestamp,
+    }
+
+    const winner = await req.db.collection('users').findOne({id: parseInt(winnerId)});
+    winner.winningBids.push(winningBid);
+    await req.db.collection('users').updateOne({id: parseInt(winnerId)}, {$push: {winningBids: winningBid}});
+  }
+  next();
+}
+
 const verifyAuctionStatus = async (req, res, next) => {
   const auction = await req.db.collection("auctions").findOne({id: req.params.id});
-  const now = new Date();
-  const auctionEndTime = auction.endTime;
-  if (now < auctionEndTime) {
-    next();
-  } else {
-    res.status(406).send("The auction is expired");
+  if (!auction.open) {
+    res.status(401).send("The auctions is expired");
   }
+  next();
 };
 
 const verifyBidValidity = async (req, res, next) => {
   const auction = await req.db.collection("auctions").findOne({id: req.params.id});
-  console.log("Auction ID:", auction.id);
   const highestBid = auction.bidsHistory[auction.bidsHistory.length - 1].amount;
   const attemptedBid = req.body.amount;
-  if (highestBid < attemptedBid) {
-    next();
-  } else {
+  if (highestBid > attemptedBid) {
     res.status(406).send("The bid is not valid");
   }
+  next();
 };
 
 const verifyAuthorization = async (req, res, next) => {
@@ -63,13 +83,13 @@ const verifyAuthorization = async (req, res, next) => {
   }
 }
 
-router.get('/users/:id', async (req, res) => {
+router.get('/users/:id', updateAuctionStatus, async (req, res) => {
   const user = await req.db.collection('users').findOne({id: parseInt(req.params.id)});
   const {id, username, name, surname, winningBids} = user;
   res.json({id, username, name, surname, winningBids});
 });
 
-router.get('/users', async (req, res) => {
+router.get('/users', updateAuctionStatus, async (req, res) => {
   const query = req.query.q;
 
   const filter = query
@@ -86,7 +106,7 @@ router.get('/users', async (req, res) => {
   res.json(users);
 });
 
-router.get('/auctions', async (req, res) => {
+router.get('/auctions', updateAuctionStatus, async (req, res) => {
   const query = req.query.q;
 
   const filter = query
@@ -102,7 +122,7 @@ router.get('/auctions', async (req, res) => {
   res.json(auctions);
 });
 
-router.get('/auctions/:id', async (req, res) => {
+router.get('/auctions/:id', updateAuctionStatus, async (req, res) => {
   const auction = await req.db.collection('auctions').findOne({id: parseInt(req.params.id)});
   const {id, title, description, sellerId, status} = auction;
   res.json({id, title, description, sellerId, status});
@@ -115,7 +135,7 @@ router.get('/auctions/:id/bids', async (req, res) => {
 })
 
 router.get('/bids/:id', async (req, res) => {
-  const bid = await req.db.collection('bids').findOne({id: parseInt(req.params.id)});
+  const bid = await req.db.collection('auctions').findOne({"bidsHistory.id": parseInt(req.params.id)}, {projection: {"bidsHistory.$": 1}});
   res.json(bid);
 });
 
@@ -136,10 +156,11 @@ router.post('/auctions', verifyAuthentication, async (req, res) => {
     currentPrice: parseInt(req.body.startPrice),
     startTime: new Date(),
     endTime: new Date(req.body.endTime),
-    status: 'open',
+    open: true,
     bidsHistory: [
       {
-        bidderId: id,
+        id: generateId(),
+        bidder: parseInt(id),
         amount: parseInt(req.body.startPrice),
         timestamp: new Date()
       }
@@ -169,33 +190,24 @@ router.delete('/auctions/:id', verifyAuthentication, verifyAuthorization, async 
 });
 
 router.post('/auctions/:id/bids', verifyAuthentication, async (req, res) => {
+  const {id} = jwt.decode(req.cookies.token);
+  const bidderId = id;
   const auction = await req.db.collection('auctions').findOne({id: parseInt(req.params.id)});
-  console.log(auction.id);
   const highestBid = auction.bidsHistory[auction.bidsHistory.length - 1].amount;
   const attemptedBid = req.body.amount;
   if (highestBid < attemptedBid) {
     const bid = {
       id: generateId(),
+      bidder: bidderId,
       amount: req.body.amount,
-      timeStamp: new Date()
+      timestamp: new Date()
     }
     auction.bidsHistory.push(bid);
-    await req.db.collection('auctions').updateOne(
-      { id: auction.id },
-      { $set: { bidsHistory: auction.bidsHistory, currentPrice: bid.amount } }
-    );
+    await req.db.collection('auctions').updateOne({id: auction.id}, {$set: {bidsHistory: auction.bidsHistory, currentPrice: bid.amount}});
     res.status(200).send("Bid successfully placed!");
   } else {
     res.status(406).send("The bid is not valid");
   }
-});
-
-router.get('/signout', verifyAuthentication, (req, res) => {
-  res.cookie("token", ' ', {
-    httpOnly: true,
-    expires: new Date(0)
-  });
-  res.status(200).send('Successfully signed out!');
 });
 
 

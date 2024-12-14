@@ -40,7 +40,7 @@
     <!-- Dashboard Utente -->
     <div v-if="authenticated">
         <h2>Welcome, {{ userInfo.username }}</h2>
-        <button class="logout-button" @click="signout">Sign out</button>
+<!--        <button class="logout-button" @click="signout">Sign out</button>-->
         <button @click="toggleNewAuctionForm">New Auction</button>
 
 
@@ -75,7 +75,7 @@
                 {{ auction.description }} <br>
                 Current Price: {{ auction.currentPrice }} € <br>
                 Auction ends on: {{ formatDate(auction.endTime) }} <br>
-                <!-- Status: {{ auction.status }} <br> sarà calcolato -->
+                Status: {{ printStatus(auction.open) }} <br>
 
                 <button v-if="isAuctionOpen(auction.endTime) && authenticated" @click="toggleNewBidForm(auction.id)">Bid</button>
 
@@ -102,7 +102,22 @@
         <ul>
             <li v-for="user in users" :key="user.id">
                 <strong>{{ user.username }}</strong><br>
-                Name: {{ user.name }} {{ user.surname }} <br>
+
+                <button @click="toggleMoreUserInfo(user.id)">About</button>
+
+                <div v-if="user.id === selectedUserId">
+                Name: {{ user.name }} <br>
+                Surname: {{ user.surname }} <br>
+                Auctions already win: <br>
+                <ul>
+                    <li v-for="bid in user.winningBids">
+                        <strong>{{ bid.item }}</strong><br>
+                        For {{ bid.amount }} €<br>
+                        On: {{ bid.timestamp }}<br>
+                    </li>
+                </ul>
+                </div>
+
             </li>
         </ul>
     </div>

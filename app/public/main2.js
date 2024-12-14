@@ -27,14 +27,17 @@ const app = createApp({
       newBid: {
         amount: '0'
       },
+
       auctionsQuery: '',
       usersQuery: '',
       selectedAuction: '',
+      selectedUserId: '',
 
       showLoginForm: false,
       showAuctionsFilters: false,
       showNewAuctionForm: false,
       showNewBidForm: false,
+      showMoreUserInfo: false,
     }
   },
 
@@ -56,6 +59,10 @@ const app = createApp({
 
     toggleNewBidForm(auctionId) {
       this.selectedAuction = this.selectedAuction === auctionId ? null : auctionId;
+    },
+
+    toggleMoreUserInfo(userId) {
+      this.selectedUserId = this.selectedUserId === userId ? null : userId;
     },
 
     emptyAuctionsQuery() {
@@ -111,6 +118,7 @@ const app = createApp({
       })
     },
 
+    /*
     signout: function () {
       fetch('/api/signout', {
         method: 'GET',
@@ -127,6 +135,8 @@ const app = createApp({
         console.log(err);
       })
     },
+
+     */
 
     async fetchUserInfo() {
       fetch('/api/whoami', {
@@ -193,6 +203,7 @@ const app = createApp({
         headers: {
           'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(this.newAuction)
       }).then(async res => {
         const message = await res.text();
@@ -250,6 +261,14 @@ const app = createApp({
       const endTime = new Date(date);
       return now < endTime;
     },
+
+    printStatus(status) {
+      if (status) {
+        return 'open';
+      } else {
+        return 'expired';
+      }
+    }
 
   }
 });
