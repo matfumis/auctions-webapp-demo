@@ -58,23 +58,6 @@ const app = createApp({
       this.showNewAuctionForm = !this.showNewAuctionForm;
     },
 
-    /*
-    toggleNewBidForm(auctionId) {
-      this.selectedAuction = this.selectedAuction === auctionId ? null : auctionId;
-    },
-
-    toggleBidsHistory(auctionId) {
-      if (this.selectedAuction === auctionId && this.showBidsHistory) {
-        this.showBidsHistory = false;
-        this.selectedAuction = null;
-      } else {
-        this.showBidsHistory = true;
-        this.selectedAuction = auctionId;
-      }
-    },
-
-     */
-
     toggleBidsHistory(auctionId) {
       if (this.selectedAuction === auctionId && this.showBidsHistory) {
         // Se clicchiamo di nuovo, nascondiamo la cronologia
@@ -87,6 +70,7 @@ const app = createApp({
         this.selectedAuction = auctionId;
       }
     },
+
     toggleNewBidForm(auctionId) {
       if (this.selectedAuction === auctionId && this.showNewBidForm) {
         // Se clicchiamo di nuovo, nascondiamo il modulo Bid
@@ -285,6 +269,21 @@ const app = createApp({
       })
     },
 
+    async getUsername(userId){
+      fetch(`/api/users/${userId}`, {
+        method: 'GET',
+        headers:{
+          'Content-Type': 'application/json'
+        }
+      }).then(async res => {
+
+        const user = await res.json();
+        return user.username;
+      }).catch(err => {
+        console.log(err);
+      })
+    },
+
     formatDate(dateString) {
       const date = new Date(dateString);
       return date.toLocaleDateString('en-EN', {
@@ -303,11 +302,7 @@ const app = createApp({
     },
 
     printStatus(status) {
-      if (status) {
-        return 'open';
-      } else {
-        return 'expired';
-      }
+      return status ? 'open' : 'expired'
     }
 
   }

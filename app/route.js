@@ -47,8 +47,10 @@ const updateAuctionStatus = async (req, res, next) => {
     }
 
     const winner = await req.db.collection('users').findOne({id: parseInt(winnerId)});
-    winner.winningBids.push(winningBid);
-    await req.db.collection('users').updateOne({id: parseInt(winnerId)}, {$push: {winningBids: winningBid}});
+    if(winnerId !== auction.sellerId) {
+      winner.winningBids.push(winningBid);
+      await req.db.collection('users').updateOne({id: parseInt(winnerId)}, {$push: {winningBids: winningBid}});
+    }
   }
   next();
 }
@@ -85,8 +87,8 @@ const verifyAuthorization = async (req, res, next) => {
 
 router.get('/users/:id', updateAuctionStatus, async (req, res) => {
   const user = await req.db.collection('users').findOne({id: parseInt(req.params.id)});
-  const {id, username, name, surname, winningBids} = user;
-  res.json({id, username, name, surname, winningBids});
+  const {username, name, surname, winningBids} = user;
+  res.json({username, name, surname, winningBids});
 });
 
 router.get('/users', updateAuctionStatus, async (req, res) => {
@@ -131,6 +133,7 @@ router.get('/auctions/:id', updateAuctionStatus, async (req, res) => {
 router.get('/auctions/:id/bids', async (req, res) => {
   const auction = await req.db.collection('auctions').findOne({id: parseInt(req.params.id)});
   const {bids} = auction;
+  const sortedBids = bids.sort({timestamp: -1}).toArray()
   res.json({bids});
 })
 
@@ -191,14 +194,13 @@ router.delete('/auctions/:id', verifyAuthentication, verifyAuthorization, async 
 
 router.post('/auctions/:id/bids', verifyAuthentication, async (req, res) => {
   const {id} = jwt.decode(req.cookies.token);
-  const bidderId = id;
   const auction = await req.db.collection('auctions').findOne({id: parseInt(req.params.id)});
   const highestBid = auction.bidsHistory[auction.bidsHistory.length - 1].amount;
   const attemptedBid = req.body.amount;
   if (highestBid < attemptedBid) {
     const bid = {
       id: generateId(),
-      bidder: bidderId,
+      bidder: parseInt(id),
       amount: req.body.amount,
       timestamp: new Date()
     }
