@@ -6,7 +6,7 @@
     <title>Auctions App</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js" defer></script>
-    <script src="main2.js" defer></script>
+    <script src="main.js" defer></script>
 </head>
 <body>
 <div id="app">
@@ -40,7 +40,7 @@
     <!-- Dashboard Utente -->
     <div v-if="authenticated">
         <h2>Welcome, {{ userInfo.username }}</h2>
-<!--        <button class="logout-button" @click="signout">Sign out</button>-->
+        <!--        <button class="logout-button" @click="signout">Sign out</button>-->
         <button @click="toggleNewAuctionForm">New Auction</button>
 
 
@@ -77,9 +77,22 @@
                 Auction ends on: {{ formatDate(auction.endTime) }} <br>
                 Status: {{ printStatus(auction.open) }} <br>
 
-                <button v-if="isAuctionOpen(auction.endTime) && authenticated" @click="toggleNewBidForm(auction.id)">Bid</button>
+                <button @click="toggleBidsHistory(auction.id)">History</button>
 
-                <div v-if="selectedAuction === auction.id && isAuctionOpen(auction.endTime) && authenticated">
+                <div v-if="showBidsHistory && selectedAuction === auction.id">
+                    <ul>
+                        <li v-for="bid in auction.bidsHistory" :key="bid.id">
+                            bidder: {{ bid.bidder }}
+                            Amount: {{ bid.amount }}
+                        </li>
+                    </ul>
+                </div>
+
+                <button v-if="isAuctionOpen(auction.endTime) && authenticated" @click="toggleNewBidForm(auction.id)">
+                    Bid
+                </button>
+
+                <div v-if="showNewBidForm && selectedAuction === auction.id && isAuctionOpen(auction.endTime) && authenticated">
                     <form @submit.prevent="makeNewBid">
                         The bid amount has to be higher than {{ auction.currentPrice}} €<br>
                         <label>Your bid: <input type="number" step="0.01" min="0" v-model="newBid.amount"></label>
@@ -106,16 +119,16 @@
                 <button @click="toggleMoreUserInfo(user.id)">About</button>
 
                 <div v-if="user.id === selectedUserId">
-                Name: {{ user.name }} <br>
-                Surname: {{ user.surname }} <br>
-                Auctions already win: <br>
-                <ul>
-                    <li v-for="bid in user.winningBids">
-                        <strong>{{ bid.item }}</strong><br>
-                        For {{ bid.amount }} €<br>
-                        On: {{ bid.timestamp }}<br>
-                    </li>
-                </ul>
+                    Name: {{ user.name }} <br>
+                    Surname: {{ user.surname }} <br>
+                    Auctions already won: <br>
+                    <ul>
+                        <li v-for="bid in user.winningBids">
+                            <strong>{{ bid.item }}</strong><br>
+                            For {{ bid.amount }} €<br>
+                            On: {{ bid.timestamp }}<br>
+                        </li>
+                    </ul>
                 </div>
 
             </li>
