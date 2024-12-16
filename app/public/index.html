@@ -42,6 +42,7 @@
         <h2>Welcome, {{ userInfo.username }}</h2>
         <!--        <button class="logout-button" @click="signout">Sign out</button>-->
         <button @click="toggleNewAuctionForm">New Auction</button>
+        <button @click="fetchUserCreatedAuctionsAndTogglePersonalArea">Personal Area</button>
 
 
         <!-- Creazione Nuova Asta -->
@@ -54,6 +55,18 @@
                 <label>End Time: <input type="datetime-local" v-model="newAuction.endTime" required></input></label>
                 <button type="submit">Create</button>
             </form>
+        </div>
+
+        <div v-if="showPersonalArea">
+            <h2>Personal Area</h2>
+            Name: {{ userInfo.name }} <br>
+            Surname: {{ userInfo.surname }} <br>
+            Auctions you created: {{ userInfo.auctions }} <br>
+            <ul>
+                <li v-for="auction in auctions" :key="auction.id">
+                {{ auction.title }}<br>
+                </li>
+            </ul>
         </div>
     </div>
 

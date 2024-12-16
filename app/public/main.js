@@ -8,6 +8,7 @@ const app = createApp({
       userInfo: {},
       auctions: {},
       users: {},
+      userCreatedAuctions:{},
       signinData: {
         username: '',
         password: ''
@@ -39,6 +40,7 @@ const app = createApp({
       showNewBidForm: false,
       showMoreUserInfo: false,
       showBidsHistory: false,
+      showPersonalArea: false,
     }
   },
 
@@ -84,6 +86,10 @@ const app = createApp({
       }
     },
 
+    togglePersonalArea() {
+      this.showPersonalArea = !this.showPersonalArea;
+    },
+
     toggleMoreUserInfo(userId) {
       this.selectedUserId = this.selectedUserId === userId ? null : userId;
     },
@@ -108,10 +114,10 @@ const app = createApp({
         const message = await res.text();
         if (res.ok) {
           alert(message);
-          this.signupData = ''
+          this.signupData = {}
         } else {
           alert(message);
-          this.signupData = ''
+          this.signupData = {}
         }
       }).catch(err => {
         console.log(err);
@@ -131,11 +137,11 @@ const app = createApp({
         if (res.ok) {
           this.authenticated = true;
           this.toggleLoginForm();
-          this.signinData = '';
+          this.signinData = {};
           alert(message);
         } else {
           alert(message);
-          this.signinData = '';
+          this.signinData = {};
         }
       }).catch(err => {
         console.log(err);
@@ -200,8 +206,19 @@ const app = createApp({
       }
     },
 
+    async fetchUserCreatedAuctionsAndTogglePersonalArea(){
+      this.togglePersonalArea();
+      await this.fetchUserCreatedAuctions();
+    },
+
+    async fetchUserCreatedAuctions() {
+      this.auctionsQuery = this.userInfo.id;
+      await this.fetchAuctions(); // Aspetta che la funzione fetchAuctions sia completata
+      this.auctionsQuery = ''; // Pulisce la query
+    },
+
     async fetchUsers() {
-      if (this.usersQuery === '') {
+      if (this.usersQuery.trim() === '' ) {
         fetch('/api/users', {
           method: 'GET'
         }).then(async res => {

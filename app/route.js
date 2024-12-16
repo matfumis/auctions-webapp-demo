@@ -60,7 +60,7 @@ const updateAuctionStatus = async (req, res, next) => {
 const verifyAuctionStatus = async (req, res, next) => {
   const auction = await req.db.collection("auctions").findOne({id: parseInt(req.params.id)});
   if (!auction.open) {
-    res.status(401).send("The auctions is expired");
+    return res.status(401).send("The auctions is expired");
   }
   next();
 };
@@ -70,7 +70,7 @@ const verifyBidValidity = async (req, res, next) => {
   const highestBid = auction.bidsHistory[auction.bidsHistory.length - 1].amount;
   const attemptedBid = req.body.amount;
   if (highestBid > attemptedBid) {
-    res.status(406).send("The bid is not valid");
+    return res.status(406).send("The bid is not valid");
   }
   next();
 };
@@ -80,7 +80,7 @@ const verifyAuctionValidity = async (req, res, next) => {
   const endTime = DateTime.fromISO(req.body.endTime, {zone: 'Europe/Rome'});
   const startPrice = req.body.startPrice;
   if (endTime < now || startPrice <= 0) {
-    res.status(401).send("The auction is not valid");
+    return res.status(401).send("The auction is not valid");
   }
   next();
 }
@@ -90,11 +90,10 @@ const verifyAuthorization = async (req, res, next) => {
   const {id} = jwt.decode(req.cookies.token);
   const requestingUserId = parseInt(id);
   const auctionSellerId = parseInt(auction.sellerId);
-  if (requestingUserId === auctionSellerId) {
-    next();
-  } else {
-    res.status(401).send("Not authorized");
+  if (requestingUserId !== auctionSellerId) {
+    return res.status(401).send("Not authorized");
   }
+  next();
 }
 
 router.get('/users/:id', updateAuctionStatus, async (req, res) => {
@@ -127,7 +126,10 @@ router.get('/auctions', updateAuctionStatus, async (req, res) => {
     ? {
       $or: [
         {title: {$regex: `${query}`, $options: 'i'}},
-        {description: {$regex: `${query}`, $options: 'i'}}
+        {description: {$regex: `${query}`, $options: 'i'}},
+        ...(Number.isInteger(Number(query)) // Verifica se la query è un numero intero
+          ? [{ sellerId: Number(query) }] // Aggiungi la condizione per sellerId
+          : []),
       ]
     }
     : {};

@@ -5,7 +5,7 @@
 
 - non inserire prima offerta di default 
   - gestire di consguenza caso con lista vuota
-- mostrare nome offerente anziché id
+- mostrare nome offerente anziché idg
 
 - [x] mostrare bottone per fare offerta (o colore diverso) solo per utenti autenticati
 - [x] sistemare form offerta

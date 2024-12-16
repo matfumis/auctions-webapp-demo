@@ -6,7 +6,19 @@ const jwt = require('jsonwebtoken');
 const secret = 'secret';
 
 
-router.post('/signup', async (req, res) => {
+const verifySignupValidity = async (req, res, next) => {
+  if (!req.body.username || req.body.username.trim() === "" ||
+      !req.body.name || req.body.name.trim() === "" ||
+      !req.body.surname || req.body.surname.trim() === "" ||
+      !req.body.password || req.body.password.trim() === ""
+  ) {
+    return res.status(401).send("Some fields are not valid");
+  }
+  next();
+}
+
+
+router.post('/signup', verifySignupValidity, async (req, res) => {
   try {
     const mongo = await db.connectToDb();
     if (await isUsernameUnique(req.body.username, mongo)) {
