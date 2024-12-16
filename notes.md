@@ -2,14 +2,18 @@
 
 ## To-Do
 
+
+- non inserire prima offerta di default 
+  - gestire di consguenza caso con lista vuota
+- mostrare nome offerente anziché id
+
 - [x] mostrare bottone per fare offerta (o colore diverso) solo per utenti autenticati
 - [x] sistemare form offerta
 - [x] assegnare vincitore aste
-- [ ] mostrare status asta calcolato
+- [x] mostrare status asta calcolato
     - se asta chiusa, mostrare username utente vincente
 - [ ] mostrare prima aste aperte e quelle chiuse
-- [ ] espandere dettagli asta
-- [ ] decisione su collezione `bids`
+- [x] espandere dettagli asta
 - [ ] inserire try-catch backend
 - [ ] aggiungere filtro asta (aperta/chiusa)
 - [ ] migliorare frontend (bootstrap?)

@@ -4,6 +4,8 @@ const db = require("./db.js");
 const jwt = require("jsonwebtoken");
 const secret = 'secret';
 
+const {DateTime} = require('luxon');
+
 
 router.use(async (req, res, next) => {
   try {
@@ -29,7 +31,7 @@ const verifyAuthentication = (req, res, next) => {
 };
 
 const updateAuctionStatus = async (req, res, next) => {
-  const now = new Date();
+  const now = DateTime.now().setZone('Europe/Rome');
   const expiredAuctions = await req.db.collection('auctions').find({endTime: {$lt: now}, open: true}).toArray();
   for (const auction of expiredAuctions) {
     const changes = {
@@ -47,7 +49,7 @@ const updateAuctionStatus = async (req, res, next) => {
     }
 
     const winner = await req.db.collection('users').findOne({id: parseInt(winnerId)});
-    if(winnerId !== auction.sellerId) {
+    if (winnerId !== auction.sellerId) {
       winner.winningBids.push(winningBid);
       await req.db.collection('users').updateOne({id: parseInt(winnerId)}, {$push: {winningBids: winningBid}});
     }
@@ -72,6 +74,16 @@ const verifyBidValidity = async (req, res, next) => {
   }
   next();
 };
+
+const verifyAuctionValidity = async (req, res, next) => {
+  const now = DateTime.now().setZone('Europe/Rome');
+  const endTime = DateTime.fromISO(req.body.endTime, {zone: 'Europe/Rome'});
+  const startPrice = req.body.startPrice;
+  if (endTime < now || startPrice <= 0) {
+    res.status(401).send("The auction is not valid");
+  }
+  next();
+}
 
 const verifyAuthorization = async (req, res, next) => {
   const auction = await req.db.collection('auctions').findOne({id: parseInt(req.params.id)});
@@ -133,8 +145,9 @@ router.get('/auctions/:id', updateAuctionStatus, async (req, res) => {
 router.get('/auctions/:id/bids', async (req, res) => {
   const auction = await req.db.collection('auctions').findOne({id: parseInt(req.params.id)});
   const {bids} = auction;
-  const sortedBids = bids.sort({timestamp: -1}).toArray()
-  res.json({bids});
+  const sortedBids = bids.sort({timestamp: -1}).toArray();
+  res.json(sortedBids);
+  // res.json({bids});
 })
 
 router.get('/bids/:id', async (req, res) => {
@@ -148,7 +161,7 @@ router.get('/whoami', verifyAuthentication, async (req, res) => {
   res.status(200).json(user);
 })
 
-router.post('/auctions', verifyAuthentication, async (req, res) => {
+router.post('/auctions', verifyAuthentication, verifyAuctionValidity, async (req, res) => {
   const {id} = jwt.decode(req.cookies.token);
   const auction = {
     id: generateId(),
@@ -157,15 +170,15 @@ router.post('/auctions', verifyAuthentication, async (req, res) => {
     sellerId: id,
     startPrice: parseInt(req.body.startPrice),
     currentPrice: parseInt(req.body.startPrice),
-    startTime: new Date(),
-    endTime: new Date(req.body.endTime),
+    startTime: DateTime.now().setZone('Europe/Rome'),
+    endTime: DateTime.fromISO(req.body.endTime, {zone: 'Europe/Rome'}),
     open: true,
     bidsHistory: [
       {
         id: generateId(),
         bidder: parseInt(id),
         amount: parseInt(req.body.startPrice),
-        timestamp: new Date()
+        timestamp: DateTime.now().setZone('Europe/Rome'),
       }
     ]
   }
@@ -192,7 +205,7 @@ router.delete('/auctions/:id', verifyAuthentication, verifyAuthorization, async 
   await req.db.collection('auctions').deleteOne({id: parseInt(req.params.id)});
 });
 
-router.post('/auctions/:id/bids', verifyAuthentication, async (req, res) => {
+router.post('/auctions/:id/bids', verifyAuthentication, verifyAuctionStatus, verifyBidValidity, async (req, res) => {
   const {id} = jwt.decode(req.cookies.token);
   const auction = await req.db.collection('auctions').findOne({id: parseInt(req.params.id)});
   const highestBid = auction.bidsHistory[auction.bidsHistory.length - 1].amount;
@@ -202,10 +215,15 @@ router.post('/auctions/:id/bids', verifyAuthentication, async (req, res) => {
       id: generateId(),
       bidder: parseInt(id),
       amount: req.body.amount,
-      timestamp: new Date()
+      timestamp: DateTime.now().setZone('Europe/Rome')
     }
     auction.bidsHistory.push(bid);
-    await req.db.collection('auctions').updateOne({id: auction.id}, {$set: {bidsHistory: auction.bidsHistory, currentPrice: bid.amount}});
+    await req.db.collection('auctions').updateOne({id: auction.id}, {
+      $set: {
+        bidsHistory: auction.bidsHistory,
+        currentPrice: bid.amount
+      }
+    });
     res.status(200).send("Bid successfully placed!");
   } else {
     res.status(406).send("The bid is not valid");
