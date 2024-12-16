@@ -82,8 +82,8 @@
                 <div v-if="showBidsHistory && selectedAuction === auction.id">
                     <ul>
                         <li v-for="bid in auction.bidsHistory" :key="bid.id">
-                            bidder: {{ bid.bidder }} <br>
-                            Amount: {{ bid.amount }} <br>
+                            Bidder: {{ bid.bidder }} <br>
+                            Amount: {{ bid.amount }}€<br>
                             Made on: {{ formatDate(bid.timestamp) }} <br>
                         </li>
                     </ul>
@@ -127,7 +127,7 @@
                         <li v-for="bid in user.winningBids">
                             <strong>{{ bid.item }}</strong><br>
                             For {{ bid.amount }} €<br>
-                            On: {{ bid.timestamp }}<br>
+                            On: {{ formatDate(bid.timestamp) }}<br>
                         </li>
                     </ul>
                 </div>

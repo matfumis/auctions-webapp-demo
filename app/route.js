@@ -58,7 +58,7 @@ const updateAuctionStatus = async (req, res, next) => {
 }
 
 const verifyAuctionStatus = async (req, res, next) => {
-  const auction = await req.db.collection("auctions").findOne({id: req.params.id});
+  const auction = await req.db.collection("auctions").findOne({id: parseInt(req.params.id)});
   if (!auction.open) {
     res.status(401).send("The auctions is expired");
   }
@@ -66,7 +66,7 @@ const verifyAuctionStatus = async (req, res, next) => {
 };
 
 const verifyBidValidity = async (req, res, next) => {
-  const auction = await req.db.collection("auctions").findOne({id: req.params.id});
+  const auction = await req.db.collection("auctions").findOne({id: parseInt(req.params.id)});
   const highestBid = auction.bidsHistory[auction.bidsHistory.length - 1].amount;
   const attemptedBid = req.body.amount;
   if (highestBid > attemptedBid) {
