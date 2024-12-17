@@ -25,6 +25,10 @@ const app = createApp({
         startPrice: '',
         endTime: ''
       },
+      editedAuction: {
+        title: '',
+        description: '',
+      },
       newBid: {
         amount: '0'
       },
@@ -41,13 +45,14 @@ const app = createApp({
       showMoreUserInfo: false,
       showBidsHistory: false,
       showPersonalArea: false,
+      showEditAuctionForm: false,
     }
   },
 
   mounted() {
     this.fetchUserInfo();
     this.fetchAuctions();
-    // this.fetchUsers();
+
   },
 
   methods: {
@@ -62,13 +67,25 @@ const app = createApp({
 
     toggleBidsHistory(auctionId) {
       if (this.selectedAuction === auctionId && this.showBidsHistory) {
-        // Se clicchiamo di nuovo, nascondiamo la cronologia
+
         this.showBidsHistory = false;
         this.selectedAuction = null;
       } else {
-        // Mostra solo la cronologia (nasconde il modulo Bid)
+
         this.showBidsHistory = true;
         this.showNewBidForm = false;
+        this.selectedAuction = auctionId;
+      }
+    },
+
+    toggleEditAuctionForm(auctionId) {
+      if (this.selectedAuction === auctionId && this.showEditAuctionForm) {
+
+        this.showEditAuctionForm = false;
+        this.selectedAuction = null;
+      } else {
+
+        this.showEditAuctionForm = true;
         this.selectedAuction = auctionId;
       }
     },
@@ -211,11 +228,12 @@ const app = createApp({
       await this.fetchUserCreatedAuctions();
     },
 
-    async fetchUserCreatedAuctions() {
-      this.auctionsQuery = this.userInfo.id;
-      await this.fetchAuctions(); // Aspetta che la funzione fetchAuctions sia completata
-      this.auctionsQuery = ''; // Pulisce la query
-    },
+     async fetchUserCreatedAuctions() {
+       this.auctionsQuery = this.userInfo.id;
+       await this.fetchAuctions().then(async res => {
+         this.auctions = await res.json()
+       });
+     },
 
     async fetchUsers() {
       if (this.usersQuery.trim() === '' ) {
@@ -250,7 +268,6 @@ const app = createApp({
         const message = await res.text();
         if (res.ok) {
           alert(message);
-          // this.newAuction = await res.json();
           await this.fetchAuctions();
           this.toggleNewAuctionForm();
         } else {
@@ -259,6 +276,41 @@ const app = createApp({
       }).catch(err => {
         console.log(err);
       });
+    },
+
+    async deleteAuction(id) {
+      fetch(`/api/auctions/${id}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      }).then(async res =>{
+        if(res.ok){
+          alert('Auction successfully deleted!');
+          await this.fetchUserCreatedAuctions();
+        } else {
+          alert('Error while deleting auction');
+        }
+      }).catch(err => {
+        console.log(err);
+      })
+    },
+
+    async editAuction(id) {
+      fetch(`/api/auctions/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(this.editedAuction)
+      }).then(async res => {
+        if(res.ok){
+          alert('Auction successfully updated!');
+          this.toggleEditAuctionForm(id);
+          await this.fetchAuctions();
+        }
+      }).catch(err => {
+        console.log(err);
+      })
     },
 
     makeNewBid() {

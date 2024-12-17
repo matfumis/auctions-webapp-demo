@@ -86,12 +86,13 @@ const verifyAuctionValidity = async (req, res, next) => {
 }
 
 const verifyAuthorization = async (req, res, next) => {
-  const auction = await req.db.collection('auctions').findOne({id: parseInt(req.params.id)});
+  console.log(req.params.id);
+  const auction = await req.db.collection("auctions").findOne({id: parseInt(req.params.id)});
   const {id} = jwt.decode(req.cookies.token);
   const requestingUserId = parseInt(id);
   const auctionSellerId = parseInt(auction.sellerId);
   if (requestingUserId !== auctionSellerId) {
-    return res.status(401).send("Not authorized");
+    return res.status(401).send("Anauthorized");
   }
   next();
 }
@@ -127,8 +128,8 @@ router.get('/auctions', updateAuctionStatus, async (req, res) => {
       $or: [
         {title: {$regex: `${query}`, $options: 'i'}},
         {description: {$regex: `${query}`, $options: 'i'}},
-        ...(Number.isInteger(Number(query)) // Verifica se la query è un numero intero
-          ? [{ sellerId: Number(query) }] // Aggiungi la condizione per sellerId
+        ...(Number.isInteger(Number(query))
+          ? [{sellerId: Number(query)}]
           : []),
       ]
     }
@@ -190,21 +191,21 @@ router.post('/auctions', verifyAuthentication, verifyAuctionValidity, async (req
 
 });
 
-router.put('/auctions/:id', verifyAuthentication, verifyAuthorization, async (req, res, err) => {
-  const auction = await req.db.collection('auctions').findOne({id: parseInt(req.params.id)});
+router.put('/auctions/:id', verifyAuthentication, /* verifyAuthorization, */ async (req, res, err) => {
 
   let changes = {
     title: req.body.title,
     description: req.body.description,
-    endTime: req.body.endTime,
   }
-  await req.db.collection('auctions').updateOne(changes, auction);
+
+  await req.db.collection('auctions').updateOne({id: parseInt(req.params.id)}, {$set: changes});
   res.status(200).send("Auction successfully updated!");
 
 });
 
-router.delete('/auctions/:id', verifyAuthentication, verifyAuthorization, async (req, res, err) => {
+router.delete('/auctions/:id', verifyAuthentication, /* verifyAuthorization, */ async (req, res, err) => {
   await req.db.collection('auctions').deleteOne({id: parseInt(req.params.id)});
+  res.status(200).send("Auction successfully deleted!");
 });
 
 router.post('/auctions/:id/bids', verifyAuthentication, verifyAuctionStatus, verifyBidValidity, async (req, res) => {
