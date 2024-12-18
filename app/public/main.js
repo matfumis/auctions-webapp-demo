@@ -120,12 +120,12 @@ const app = createApp({
         },
         body: JSON.stringify(this.signupData)
       }).then(async res => {
-        const message = await res.text();
+        //const message = await res.text();
         if (res.ok) {
-          alert(message);
+          alert('Successfully signed up!');
           this.signupData = {}
         } else {
-          alert(message);
+          alert();
           this.signupData = {}
         }
       }).catch(err => {

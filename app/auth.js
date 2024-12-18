@@ -8,11 +8,11 @@ const secret = 'secret';
 
 const verifySignupValidity = async (req, res, next) => {
   if (!req.body.username || req.body.username.trim() === "" ||
-      !req.body.name || req.body.name.trim() === "" ||
-      !req.body.surname || req.body.surname.trim() === "" ||
-      !req.body.password || req.body.password.trim() === ""
+    !req.body.name || req.body.name.trim() === "" ||
+    !req.body.surname || req.body.surname.trim() === "" ||
+    !req.body.password || req.body.password.trim() === ""
   ) {
-    return res.status(401).send("Some fields are not valid");
+    return res.status(400).send("Some fields are not valid");
   }
   next();
 }
@@ -31,44 +31,51 @@ router.post('/signup', verifySignupValidity, async (req, res) => {
         winningBids: []
       }
       await mongo.collection("users").insertOne(user);
-      res.status(200).send("Successfully registered user!");
+      const userInfo = {
+        id: generateId(),
+        name: user.name,
+        surname: user.surname,
+        username: user.username
+      }
+      res.status(200).json(userInfo);
     } else {
-      res.status(400).send("Username already taken!");
+      res.status(400);
     }
-  } catch (error) {
-    res.status(500).send("Internal server error!");
+  } catch (err) {
+    console.error(err)
+    res.status(500);
   }
 });
 
 router.post('/signin', async (req, res) => {
   try {
-    const {username, password} = req.body;
+    const { username, password } = req.body;
     console.log(req.body);
     const mongo = await db.connectToDb();
-    const user = await mongo.collection("users").findOne({username: username});
+    const user = await mongo.collection("users").findOne({ username: username });
 
     if (await areUsernameAndPasswordValid(username, password, mongo)) {
-      const data = {id: user.id}
-      const token = jwt.sign(data, secret, {expiresIn: 86400});
-      res.cookie("token", token, {httpOnly: true});
-      res.status(200).send("Successfully signed in!");
+      const data = { id: user.id }
+      const token = jwt.sign(data, secret, { expiresIn: 86400 });
+      res.cookie("token", token, { httpOnly: true });
+      res.status(200);
     } else {
-      res.status(401).send("Invalid username or password!");
+      res.status(400);
     }
 
   } catch (err) {
-    res.status(500).send("Internal server error!");
+    res.status(500);
   }
 });
 
 
 async function isUsernameUnique(username, mongo) {
-  const cursor = await mongo.collection("users").findOne({username: username});
+  const cursor = await mongo.collection("users").findOne({ username: username });
   return !cursor;
 }
 
 async function areUsernameAndPasswordValid(username, password, mongo) {
-  const cursor = await mongo.collection("users").findOne({username: username, password: password});
+  const cursor = await mongo.collection("users").findOne({ username: username, password: password });
   return !!cursor;
 }
 

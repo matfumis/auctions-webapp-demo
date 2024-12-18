@@ -12,10 +12,19 @@
 <div id="app">
     <h1>Auctions App</h1>
 
-    <!-- Bottone Login/Signup -->
+    <div id="main-buttons">
+        <div v-if="!authenticated && !showLoginForm">
+            <button @click="toggleLoginForm">Sign in / Sign up</button>
+        </div>
+
+        
+
+    </div>
+
+    <!-- Bottone Login/Signup 
     <div v-if="!authenticated && !showLoginForm">
         <button @click="toggleLoginForm">Sign in / Sign up</button>
-    </div>
+    </div> -->
 
     <!-- Sezione Login/Signup -->
     <div v-if="showLoginForm">
