@@ -148,7 +148,7 @@ router.get('/auctions/:id', updateAuctionStatus, async (req, res) => {
 router.get('/auctions/:id/bids', async (req, res) => {
   const auction = await req.db.collection('auctions').findOne({id: parseInt(req.params.id)});
   const {bids} = auction;
-  const sortedBids = bids.sort({timestamp: -1}).toArray();
+  const sortedBids = bids.sort({amount: -1}).toArray();
   res.json(sortedBids);
   // res.json({bids});
 })
@@ -191,7 +191,7 @@ router.post('/auctions', verifyAuthentication, verifyAuctionValidity, async (req
 
 });
 
-router.put('/auctions/:id', verifyAuthentication, /* verifyAuthorization, */ async (req, res, err) => {
+router.put('/auctions/:id', verifyAuthentication, verifyAuthorization, async (req, res, err) => {
 
   let changes = {
     title: req.body.title,
@@ -203,20 +203,21 @@ router.put('/auctions/:id', verifyAuthentication, /* verifyAuthorization, */ asy
 
 });
 
-router.delete('/auctions/:id', verifyAuthentication, /* verifyAuthorization, */ async (req, res, err) => {
+router.delete('/auctions/:id', verifyAuthentication, verifyAuthorization, async (req, res, err) => {
   await req.db.collection('auctions').deleteOne({id: parseInt(req.params.id)});
   res.status(200).send("Auction successfully deleted!");
 });
 
 router.post('/auctions/:id/bids', verifyAuthentication, verifyAuctionStatus, verifyBidValidity, async (req, res) => {
   const {id} = jwt.decode(req.cookies.token);
+  const user = await req.db.collection('users').findOne({id: parseInt(id)});
   const auction = await req.db.collection('auctions').findOne({id: parseInt(req.params.id)});
   const highestBid = auction.bidsHistory[auction.bidsHistory.length - 1].amount;
   const attemptedBid = req.body.amount;
   if (highestBid < attemptedBid) {
     const bid = {
       id: generateId(),
-      bidder: parseInt(id),
+      bidder: user.username,
       amount: req.body.amount,
       timestamp: DateTime.now().setZone('Europe/Rome')
     }

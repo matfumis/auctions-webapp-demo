@@ -1,4 +1,4 @@
-const {createApp} = Vue
+const { createApp } = Vue
 
 const app = createApp({
 
@@ -8,7 +8,7 @@ const app = createApp({
       userInfo: {},
       auctions: {},
       users: {},
-      userCreatedAuctions:{},
+      userCreatedAuctions: {},
       signinData: {
         username: '',
         password: ''
@@ -30,7 +30,7 @@ const app = createApp({
         description: '',
       },
       newBid: {
-        amount: '0'
+        amount: ''
       },
 
       auctionsQuery: '',
@@ -92,11 +92,11 @@ const app = createApp({
 
     toggleNewBidForm(auctionId) {
       if (this.selectedAuction === auctionId && this.showNewBidForm) {
-        // Se clicchiamo di nuovo, nascondiamo il modulo Bid
+
         this.showNewBidForm = false;
         this.selectedAuction = null;
       } else {
-        // Mostra solo il modulo Bid (nasconde la cronologia)
+
         this.showNewBidForm = true;
         this.showBidsHistory = false;
         this.selectedAuction = auctionId;
@@ -111,14 +111,6 @@ const app = createApp({
       this.selectedUserId = this.selectedUserId === userId ? null : userId;
     },
 
-
-    emptyAuctionsQuery() {
-      this.auctionsQuery = '';
-    },
-
-    emptyUsersQuery() {
-      this.usersQuery = '';
-    },
 
     signup: function () {
       fetch('/api/auth/signup', {
@@ -216,27 +208,31 @@ const app = createApp({
           method: 'GET'
         }).then(async res => {
           this.auctions = await res.json();
-          this.emptyAuctionsQuery();
+          this.auctionsQuery = '';
         }).catch(err => {
           console.log(err);
         });
       }
     },
 
-    async fetchUserCreatedAuctionsAndTogglePersonalArea(){
-      this.togglePersonalArea();
-      await this.fetchUserCreatedAuctions();
+    async fetchUserCreatedAuctions() {
+      const userAuctionsResponse = await fetch(`/api/auctions?q=${encodeURIComponent(this.userInfo.id)}`, {
+        method: 'GET'
+      });
+      this.userCreatedAuctions = await userAuctionsResponse.json();
+      await this.fetchAuctions();
     },
-
-     async fetchUserCreatedAuctions() {
-       this.auctionsQuery = this.userInfo.id;
-       await this.fetchAuctions().then(async res => {
-         this.auctions = await res.json()
-       });
-     },
+    
+    /*
+    async fetchUserCreatedAuctions() {
+      this.auctionsQuery = this.userInfo.id;
+      await this.fetchAuctions();
+      this.userCreatedAuctions = this.auctions;
+    },
+    */
 
     async fetchUsers() {
-      if (this.usersQuery.trim() === '' ) {
+      if (this.usersQuery.trim() === '') {
         fetch('/api/users', {
           method: 'GET'
         }).then(async res => {
@@ -249,7 +245,7 @@ const app = createApp({
           method: 'GET'
         }).then(async res => {
           this.users = await res.json();
-          this.emptyUsersQuery();
+          this.usersQuery = '';
         }).catch(err => {
           console.log(err);
         });
@@ -270,6 +266,7 @@ const app = createApp({
           alert(message);
           await this.fetchAuctions();
           this.toggleNewAuctionForm();
+          this.newAuction = {};
         } else {
           alert(message);
         }
@@ -282,8 +279,8 @@ const app = createApp({
       fetch(`/api/auctions/${id}`, {
         method: 'DELETE',
         credentials: 'include'
-      }).then(async res =>{
-        if(res.ok){
+      }).then(async res => {
+        if (res.ok) {
           alert('Auction successfully deleted!');
           await this.fetchUserCreatedAuctions();
         } else {
@@ -294,6 +291,7 @@ const app = createApp({
       })
     },
 
+    
     async editAuction(id) {
       fetch(`/api/auctions/${id}`, {
         method: 'PUT',
@@ -303,15 +301,17 @@ const app = createApp({
         credentials: 'include',
         body: JSON.stringify(this.editedAuction)
       }).then(async res => {
-        if(res.ok){
+        if (res.ok) {
+          await this.fetchUserCreatedAuctions();
           alert('Auction successfully updated!');
           this.toggleEditAuctionForm(id);
-          await this.fetchAuctions();
+
         }
       }).catch(err => {
         console.log(err);
       })
     },
+  
 
     makeNewBid() {
       fetch(`/api/auctions/${encodeURIComponent(this.selectedAuction)}/bids`, {
@@ -326,11 +326,11 @@ const app = createApp({
         if (res.ok) {
           alert(message);
           this.toggleNewBidForm();
-          this.newBid = '0';
+          this.newBid.amount = '';
           await this.fetchAuctions();
         } else {
           alert(message);
-          this.newBid = '0';
+          this.newBid.amount = '';
           await this.fetchAuctions();
         }
       }).catch(err => {
@@ -338,10 +338,10 @@ const app = createApp({
       })
     },
 
-    async getUsername(userId){
+    async getUsername(userId) {
       fetch(`/api/users/${userId}`, {
         method: 'GET',
-        headers:{
+        headers: {
           'Content-Type': 'application/json'
         }
       }).then(async res => {

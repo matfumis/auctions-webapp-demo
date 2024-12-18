@@ -42,7 +42,7 @@
         <h2>Welcome, {{ userInfo.username }}</h2>
         <!--        <button class="logout-button" @click="signout">Sign out</button>-->
         <button @click="toggleNewAuctionForm">New Auction</button>
-        <button @click="fetchUserCreatedAuctionsAndTogglePersonalArea">Personal Area</button>
+        <button @click="togglePersonalArea">Personal Area</button>
 
 
         <!-- Creazione Nuova Asta -->
@@ -61,9 +61,9 @@
             <h2>Personal Area</h2>
             Name: {{ userInfo.name }} <br>
             Surname: {{ userInfo.surname }} <br>
-            <!--<button @click="fetchUserCreatedAuctions">Your Auctions</button><br>-->
+            <button @click="fetchUserCreatedAuctions">Your Auctions</button><br>
             <ul>
-                <li v-for="auction in auctions" :key="auction.id">
+                <li v-for="auction in userCreatedAuctions" :key="auction.id">
                 {{ auction.title }}<br>
                 {{ auction.description }}<br>
                     <button @click="deleteAuction(auction.id)">Delete</button>
