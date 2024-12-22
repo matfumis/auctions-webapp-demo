@@ -31,13 +31,7 @@ router.post('/signup', verifySignupValidity, async (req, res) => {
         winningBids: []
       }
       await mongo.collection("users").insertOne(user);
-      const userInfo = {
-        id: generateId(),
-        name: user.name,
-        surname: user.surname,
-        username: user.username
-      }
-      res.status(200).json(userInfo);
+      res.status(200);
     } else {
       res.status(400);
     }
@@ -58,13 +52,14 @@ router.post('/signin', async (req, res) => {
       const data = { id: user.id }
       const token = jwt.sign(data, secret, { expiresIn: 86400 });
       res.cookie("token", token, { httpOnly: true });
-      res.status(200);
+      res.status(200).send('ok')
     } else {
-      res.status(400);
+      res.status(400).send('non ok');
     }
 
   } catch (err) {
-    res.status(500);
+    console.error(err);
+    res.status(500).send('non ok');
   }
 });
 

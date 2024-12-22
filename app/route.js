@@ -40,24 +40,31 @@ const updateAuctionStatus = async (req, res, next) => {
     const now = DateTime.now().setZone('Europe/Rome');
     const expiredAuctions = await req.db.collection('auctions').find({ endTime: { $lt: now }, open: true }).toArray();
     for (const auction of expiredAuctions) {
-      const changes = {
-        open: false
-      }
-      await req.db.collection('auctions').updateOne({ id: auction.id }, { $set: changes });
+      if (auction.bidsHistory.length > 0) {
+        const winnerUsername = auction.bidsHistory[auction.bidsHistory.length - 1].bidder;
+        const highestBid = (auction.bidsHistory[auction.bidsHistory.length - 1]);
 
-      const winnerId = auction.bidsHistory[auction.bidsHistory.length - 1].bidder;
-      const highestBid = (auction.bidsHistory[auction.bidsHistory.length - 1]);
+        const winningBid = {
+          item: auction.title,
+          amount: highestBid.amount,
+          timestamp: highestBid.timestamp,
+        }
 
-      const winningBid = {
-        item: auction.title,
-        amount: highestBid.amount,
-        timestamp: highestBid.timestamp,
-      }
-
-      const winner = await req.db.collection('users').findOne({ id: parseInt(winnerId) });
-      if (winnerId !== auction.sellerId) {
-        winner.winningBids.push(winningBid);
-        await req.db.collection('users').updateOne({ id: parseInt(winnerId) }, { $push: { winningBids: winningBid } });
+        const winner = await req.db.collection('users').findOne({ username: winnerUsername });
+        if (winnerUsername !== auction.sellerUsername) {
+          winner.winningBids.push(winningBid);
+          await req.db.collection('users').updateOne({ username: winnerUsername }, { $push: { winningBids: winningBid } });
+        }
+        const changes = {
+          open: false,
+          winner: winnerUsername
+        }
+        await req.db.collection('auctions').updateOne({ id: auction.id }, { $set: changes });
+      } else {
+        const changes = {
+          open: false,
+        }
+        await req.db.collection('auctions').updateOne({ id: auction.id }, { $set: changes });
       }
     }
     next();
@@ -80,14 +87,28 @@ const verifyAuctionStatus = async (req, res, next) => {
   }
 };
 
+
 const verifyBidValidity = async (req, res, next) => {
   try {
     const auction = await req.db.collection("auctions").findOne({ id: parseInt(req.params.id) });
-    const highestBid = auction.bidsHistory[auction.bidsHistory.length - 1].amount;
+
+    if (!auction) {
+      return res.status(404);
+    }
+
+    let highestBid;
+    if (auction.bidsHistory && auction.bidsHistory.length > 0) {
+      highestBid = auction.bidsHistory[auction.bidsHistory.length - 1].amount;
+    } else {
+      highestBid = auction.startPrice;
+    }
+
     const attemptedBid = req.body.amount;
-    if (highestBid > attemptedBid) {
+
+    if (attemptedBid <= highestBid) {
       return res.status(406).send("The bid is not valid");
     }
+
     next();
   } catch (err) {
     console.error(err);
@@ -229,24 +250,20 @@ router.get('/whoami', verifyAuthentication, async (req, res) => {
 router.post('/auctions', verifyAuthentication, verifyAuctionValidity, async (req, res) => {
   try {
     const { id } = jwt.decode(req.cookies.token);
+    const user = await req.db.collection('users').findOne({ id: parseInt(id) });
     const auction = {
       id: generateId(),
       title: req.body.title,
       description: req.body.description,
       sellerId: id,
+      sellerUsername: user.username,
       startPrice: parseInt(req.body.startPrice),
       currentPrice: parseInt(req.body.startPrice),
       startTime: DateTime.now().setZone('Europe/Rome'),
       endTime: DateTime.fromISO(req.body.endTime, { zone: 'Europe/Rome' }),
       open: true,
-      bidsHistory: [
-        {
-          id: generateId(),
-          bidder: parseInt(id),
-          amount: parseInt(req.body.startPrice),
-          timestamp: DateTime.now().setZone('Europe/Rome'),
-        }
-      ]
+      winner: '',
+      bidsHistory: []
     }
 
     await req.db.collection('auctions').insertOne(auction);
@@ -258,7 +275,7 @@ router.post('/auctions', verifyAuthentication, verifyAuctionValidity, async (req
 
 });
 
-router.put('/auctions/:id', verifyAuthentication, verifyAuthorization, async (req, res, err) => {
+router.put('/auctions/:id', verifyAuthentication, verifyAuthorization, async (req, res) => {
   try {
     let changes = {
       title: req.body.title,
@@ -273,7 +290,7 @@ router.put('/auctions/:id', verifyAuthentication, verifyAuthorization, async (re
   }
 });
 
-router.delete('/auctions/:id', verifyAuthentication, verifyAuthorization, async (req, res, err) => {
+router.delete('/auctions/:id', verifyAuthentication, verifyAuthorization, async (req, res) => {
   try {
     await req.db.collection('auctions').deleteOne({ id: parseInt(req.params.id) });
     res.status(200).send("Auction successfully deleted!");
@@ -283,31 +300,28 @@ router.delete('/auctions/:id', verifyAuthentication, verifyAuthorization, async 
   }
 });
 
+
+
 router.post('/auctions/:id/bids', verifyAuthentication, verifyAuctionStatus, verifyBidValidity, async (req, res) => {
   try {
     const { id } = jwt.decode(req.cookies.token);
     const user = await req.db.collection('users').findOne({ id: parseInt(id) });
     const auction = await req.db.collection('auctions').findOne({ id: parseInt(req.params.id) });
-    const highestBid = auction.bidsHistory[auction.bidsHistory.length - 1].amount;
-    const attemptedBid = req.body.amount;
-    if (highestBid < attemptedBid) {
-      const bid = {
-        id: generateId(),
-        bidder: user.username,
-        amount: req.body.amount,
-        timestamp: DateTime.now().setZone('Europe/Rome')
-      }
-      auction.bidsHistory.push(bid);
-      await req.db.collection('auctions').updateOne({ id: auction.id }, {
-        $set: {
-          bidsHistory: auction.bidsHistory,
-          currentPrice: bid.amount
-        }
-      });
-      res.status(200).send("Bid successfully placed!");
-    } else {
-      res.status(406).send("The bid is not valid");
+
+    const bid = {
+      id: generateId(),
+      bidder: user.username,
+      amount: req.body.amount,
+      timestamp: DateTime.now().setZone('Europe/Rome')
     }
+    auction.bidsHistory.push(bid);
+    await req.db.collection('auctions').updateOne({ id: auction.id }, {
+      $set: {
+        bidsHistory: auction.bidsHistory,
+        currentPrice: bid.amount
+      }
+    });
+    res.status(200).send("Bid successfully placed!");
   } catch (err) {
     console.error(err);
     res.status(500);

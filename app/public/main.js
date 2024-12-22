@@ -38,14 +38,17 @@ const app = createApp({
       selectedAuction: '',
       selectedUserId: '',
 
-      showLoginForm: false,
       showAuctionsFilters: false,
       showNewAuctionForm: false,
       showNewBidForm: false,
       showMoreUserInfo: false,
       showBidsHistory: false,
-      showPersonalArea: false,
       showEditAuctionForm: false,
+      showSignupForm: false,
+
+      showPersonalArea: false,
+      showAuctionsArea: true,
+      showUsersArea:false,
     }
   },
 
@@ -56,6 +59,8 @@ const app = createApp({
   },
 
   methods: {
+
+
 
     toggleLoginForm() {
       this.showLoginForm = !this.showLoginForm;
@@ -105,14 +110,32 @@ const app = createApp({
 
     togglePersonalArea() {
       this.showPersonalArea = !this.showPersonalArea;
+      this.showUsersArea = false;
+      this.showAuctionsArea = true
+    },
+
+    toggleAuctionsArea(){
+      this.showAuctionsArea = true
+      this.showUsersArea = false;
+      this.showPersonalArea = false;
+    },
+
+    toggleUsersArea() {
+      this.showUsersArea = !this.showUsersArea;
+      this.showPersonalArea = false;
+      this.showAuctionsArea = true
     },
 
     toggleMoreUserInfo(userId) {
       this.selectedUserId = this.selectedUserId === userId ? null : userId;
     },
 
+    toggleSignupForm() {
+      this.showSignupForm = !this.showSignupForm;
+    },
 
-    signup: function () {
+
+    signup() {
       fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
@@ -134,7 +157,7 @@ const app = createApp({
 
     },
 
-    signin: function () {
+     signin() {
       fetch('/api/auth/signin', {
         method: 'POST',
         headers: {
@@ -142,14 +165,15 @@ const app = createApp({
         },
         body: JSON.stringify(this.signinData)
       }).then(async res => {
-        const message = await res.text();
         if (res.ok) {
           this.authenticated = true;
           this.toggleLoginForm();
           this.signinData = {};
-          alert(message);
+          alert('Successfully signed in!');
+          await new Promise(resolve => setTimeout(resolve, 500));
+          window.location.href = "/";
         } else {
-          alert(message);
+          alert('Wrong username or password!');
           this.signinData = {};
         }
       }).catch(err => {

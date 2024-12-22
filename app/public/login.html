@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="css/login.css" rel="stylesheet" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script type="module" src="main.js"></script>
+</head>
+<body id="app">
+<div class="form-container">
+  <div class="form-box">
+    <h2>Sign in</h2>
+    <form @submit.prevent="signin">
+      <label>Username: <input type="text" v-model="signinData.username" required /></label>
+      <label>Password: <input type="password" v-model="signinData.password" required /></label>
+      <button type="submit">Sign in</button>
+    </form>
+    <button @click="toggleSignupForm" class="toggle-button">Show Sign Up</button>
+  </div>
+  <div v-if="showSignupForm" class="form-box">
+    <h2>Sign up</h2>
+    <form @submit.prevent="signup">
+      <label>Username: <input type="text" v-model="signupData.username" required /></label>
+      <label>Name: <input type="text" v-model="signupData.name" required /></label>
+      <label>Surname: <input type="text" v-model="signupData.surname" required /></label>
+      <label>Password: <input type="password" v-model="signupData.password" required /></label>
+      <button type="submit">Sign up</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>
