@@ -21,11 +21,11 @@ const verifyAuthentication = (req, res, next) => {
   try {
     const token = req.cookies.token;
     if (!token) {
-      return res.status(401).send("No token provided, please login");
+      return res.status(401).json({ msg: 'No token provided, please login' });
     }
     jwt.verify(token, secret, (err) => {
       if (err) {
-        return res.status(401).send(err);
+        return res.status(401).json({ msg: 'Authentication failed' });
       }
       next();
     });
@@ -78,7 +78,7 @@ const verifyAuctionStatus = async (req, res, next) => {
   try {
     const auction = await req.db.collection("auctions").findOne({ id: parseInt(req.params.id) });
     if (!auction.open) {
-      return res.status(401).send("The auctions is expired");
+      return res.status(401).json({ msg: 'The auction is expired' });
     }
     next();
   } catch (err) {
@@ -106,7 +106,7 @@ const verifyBidValidity = async (req, res, next) => {
     const attemptedBid = req.body.amount;
 
     if (attemptedBid <= highestBid) {
-      return res.status(406).send("The bid is not valid");
+      return res.status(406).json({ msg: 'The bid is not valid' });
     }
 
     next();
@@ -122,7 +122,7 @@ const verifyAuctionValidity = async (req, res, next) => {
     const endTime = DateTime.fromISO(req.body.endTime, { zone: 'Europe/Rome' });
     const startPrice = req.body.startPrice;
     if (endTime < now || startPrice <= 0) {
-      return res.status(401).send("The auction is not valid");
+      return res.status(401).json({ msg: 'The auction is not valid' });
     }
     next();
   } catch (err) {
@@ -139,7 +139,7 @@ const verifyAuthorization = async (req, res, next) => {
     const requestingUserId = parseInt(id);
     const auctionSellerId = parseInt(auction.sellerId);
     if (requestingUserId !== auctionSellerId) {
-      return res.status(401).send("Anauthorized");
+      return res.status(401).json({ msg: 'Unauthorized' });
     }
     next();
   } catch (err) {
@@ -151,11 +151,15 @@ const verifyAuthorization = async (req, res, next) => {
 router.get('/users/:id', updateAuctionStatus, async (req, res) => {
   try {
     const user = await req.db.collection('users').findOne({ id: parseInt(req.params.id) });
+
+    if(!user){
+      return res.status(400).json({ msg: 'User not found' });
+    }
     const { username, name, surname, winningBids } = user;
     res.status(200).json({ username, name, surname, winningBids });
   } catch (err) {
-    console.error(err)
-    res.status(500)
+    console.error(err);
+    res.status(500);
   }
 });
 
@@ -205,8 +209,12 @@ router.get('/auctions', updateAuctionStatus, async (req, res) => {
 router.get('/auctions/:id', updateAuctionStatus, async (req, res) => {
   try {
     const auction = await req.db.collection('auctions').findOne({ id: parseInt(req.params.id) });
-    const { id, title, description, sellerId, status } = auction;
-    res.status(200).json({ id, title, description, sellerId, status });
+    if (!auction) {
+      return res.status(400).json({ msg: 'Auction not found' });
+    }
+    //const { id, title, description, sellerId, status } = auction;
+    //res.status(200).json({ id, title, description, sellerId, status });
+    res.status(200).json(auction);
   } catch (err) {
     console.error(err);
     res.status(500);
@@ -216,6 +224,11 @@ router.get('/auctions/:id', updateAuctionStatus, async (req, res) => {
 router.get('/auctions/:id/bids', async (req, res) => {
   try {
     const auction = await req.db.collection('auctions').findOne({ id: parseInt(req.params.id) });
+
+    if (!auction) {
+      return res.status(400).json({ msg: 'Auction not found' });
+    }
+
     const { bids } = auction;
     const sortedBids = bids.sort({ amount: -1 }).toArray();
     res.status(200).json(sortedBids);
@@ -229,6 +242,9 @@ router.get('/auctions/:id/bids', async (req, res) => {
 router.get('/bids/:id', async (req, res) => {
   try {
     const bid = await req.db.collection('auctions').findOne({ "bidsHistory.id": parseInt(req.params.id) }, { projection: { "bidsHistory.$": 1 } });
+    if (!bid) {
+      return res.status(400).json({ msg: "Bid not found" });
+    }
     res.status(200).json(bid);
   } catch (err) {
     console.error(err);
@@ -267,7 +283,7 @@ router.post('/auctions', verifyAuthentication, verifyAuctionValidity, async (req
     }
 
     await req.db.collection('auctions').insertOne(auction);
-    res.status(200).send("Auction successfully created!");
+    res.status(200).json({ msg: 'Auction successfully created!', auction });
   } catch (err) {
     console.error(err);
     res.status(500);
@@ -277,13 +293,19 @@ router.post('/auctions', verifyAuthentication, verifyAuctionValidity, async (req
 
 router.put('/auctions/:id', verifyAuthentication, verifyAuthorization, async (req, res) => {
   try {
+    const auction = req.db.collection('auctions').findOne({ id: parseInt(req.params.id) });
+
+    if (!auction) {
+      return res.status(400).json({ msg: 'Auction not found' });
+    }
+
     let changes = {
       title: req.body.title,
       description: req.body.description,
     }
 
     await req.db.collection('auctions').updateOne({ id: parseInt(req.params.id) }, { $set: changes });
-    res.status(200).send("Auction successfully updated!");
+    res.status(200).json({ msg: 'Auction successfully updated!', auction });
   } catch (err) {
     console.error(err);
     res.status(500);
@@ -292,8 +314,12 @@ router.put('/auctions/:id', verifyAuthentication, verifyAuthorization, async (re
 
 router.delete('/auctions/:id', verifyAuthentication, verifyAuthorization, async (req, res) => {
   try {
+    const auction = req.db.collection('auctions').findOne({ id: parseInt(req.params.id) });
+    if (!auction) {
+      return res.status(400).json({ msg: 'Auction not found' });
+    }
     await req.db.collection('auctions').deleteOne({ id: parseInt(req.params.id) });
-    res.status(200).send("Auction successfully deleted!");
+    res.status(200).json({ msg: 'Auction successfully deleted!' });
   } catch (err) {
     console.error(err);
     res.status(500);
@@ -308,6 +334,10 @@ router.post('/auctions/:id/bids', verifyAuthentication, verifyAuctionStatus, ver
     const user = await req.db.collection('users').findOne({ id: parseInt(id) });
     const auction = await req.db.collection('auctions').findOne({ id: parseInt(req.params.id) });
 
+    if (!auction) {
+      return res.status(400).json({ msg: 'Auction not found' });
+    }
+
     const bid = {
       id: generateId(),
       bidder: user.username,
@@ -321,7 +351,7 @@ router.post('/auctions/:id/bids', verifyAuthentication, verifyAuctionStatus, ver
         currentPrice: bid.amount
       }
     });
-    res.status(200).send("Bid successfully placed!");
+    res.status(200).json({ msg: 'Bid successfully placed!', bid });
   } catch (err) {
     console.error(err);
     res.status(500);
