@@ -10,7 +10,7 @@
     <meta name="author" content="" />
     <title>AuctionSpace</title>
     <!-- Favicon-->
-    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href="assets/money-favicon.ico" />
     <!-- Core theme CSS (includes Bootstrap)-->
     <link href="css/styles.css" rel="stylesheet" />
   </head>
@@ -69,12 +69,13 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                <li class="nav-item active" v-if="!authenticated">
+                <li class="nav-item" v-if="!authenticated">
                   <a class="nav-link" href="login.html">Sign in / Sign up</a>
                 </li>
                 <li class="nav-item" v-if="authenticated">
                   <a class="nav-link">Welcome, {{ userInfo.username }}</a>
                 </li>
+                <!--
                 <li class="nav-item dropdown">
                   <a
                     class="nav-link dropdown-toggle"
@@ -95,7 +96,8 @@
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#!">Something else here</a>
                   </div>
-                </li>
+                </li> 
+                  -->
               </ul>
             </div>
           </div>
@@ -122,25 +124,18 @@
 
             <div v-if="showNewAuctionForm">
               <form @submit.prevent="createAuction">
-                <label
-                  >Title:
-                  <input type="text" v-model="newAuction.title" required
-                /></label>
-                <label
-                  >Description:
-                  <input type="text" v-model="newAuction.description" required
-                /></label>
-                <label
-                  >Starting price:
-                  <input type="number" v-model="newAuction.startPrice" required
-                /></label>
-                <label
-                  >End Time:
-                  <input
-                    type="datetime-local"
-                    v-model="newAuction.endTime"
-                    required
-                /></label>
+                <label>Title:</label>
+                <input type="text" v-model="newAuction.title" required />
+                <label>Description:</label>
+                <textarea maxlength="200" v-model="newAuction.description" required ></textarea>
+                <label>Starting price (€):</label>
+                <input type="number" v-model="newAuction.startPrice" required />
+                <label>End Time:</label>
+                <input
+                  type="datetime-local"
+                  v-model="newAuction.endTime"
+                  required
+                /> <br>
                 <button type="submit">Create</button>
               </form>
             </div>

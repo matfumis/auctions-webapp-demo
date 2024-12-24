@@ -12,7 +12,7 @@ const verifySignupValidity = async (req, res, next) => {
     !req.body.surname || req.body.surname.trim() === "" ||
     !req.body.password || req.body.password.trim() === ""
   ) {
-    return res.status(400).send("Some fields are not valid");
+    return res.status(400).json({msg: 'Some fields are invalid', body: req.body});
   }
   next();
 }
@@ -31,20 +31,24 @@ router.post('/signup', verifySignupValidity, async (req, res) => {
         winningBids: []
       }
       await mongo.collection("users").insertOne(user);
-      res.status(200);
+      const userData = {
+        name: user.name,
+        surname: user.surname,
+        username: user.username
+      }
+      res.status(200).json({msg: 'User succesfully created!', user: userData});
     } else {
-      res.status(400);
+      res.status(400).json({msg: 'Username already taken'});
     }
   } catch (err) {
     console.error(err)
-    res.status(500);
+    res.status(500).json({msg: 'Server error'});
   }
 });
 
 router.post('/signin', async (req, res) => {
   try {
     const { username, password } = req.body;
-    console.log(req.body);
     const mongo = await db.connectToDb();
     const user = await mongo.collection("users").findOne({ username: username });
 
@@ -52,14 +56,14 @@ router.post('/signin', async (req, res) => {
       const data = { id: user.id }
       const token = jwt.sign(data, secret, { expiresIn: 86400 });
       res.cookie("token", token, { httpOnly: true });
-      res.status(200).send('ok')
+      res.status(200).json({msg: 'Successfully logged in!'})
     } else {
-      res.status(400).send('non ok');
+      res.status(400).send({msg:'Invalid username or password'});
     }
 
   } catch (err) {
     console.error(err);
-    res.status(500).send('non ok');
+    res.status(500).json('Server error');
   }
 });
 

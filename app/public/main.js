@@ -146,10 +146,11 @@ const app = createApp({
         //const message = await res.text();
         if (res.ok) {
           alert('Successfully signed up!');
-          this.signupData = {}
+          this.showSignupForm = false;
+          this.signupData = {};
         } else {
-          alert();
-          this.signupData = {}
+          alert('Some fields are not valid');
+          this.signupData = {};
         }
       }).catch(err => {
         console.log(err);
@@ -180,26 +181,6 @@ const app = createApp({
         console.log(err);
       })
     },
-
-    /*
-    signout: function () {
-      fetch('/api/signout', {
-        method: 'GET',
-        credentials: 'include'
-      }).then(async res => {
-        const message = await res.text();
-        if (res.ok) {
-          this.authenticated = false;
-          alert(message);
-        } else {
-          alert(message);
-        }
-      }).catch(err => {
-        console.log(err);
-      })
-    },
-
-     */
 
     async fetchUserInfo() {
       fetch('/api/whoami', {
@@ -246,14 +227,6 @@ const app = createApp({
       this.userCreatedAuctions = await userAuctionsResponse.json();
       await this.fetchAuctions();
     },
-    
-    /*
-    async fetchUserCreatedAuctions() {
-      this.auctionsQuery = this.userInfo.id;
-      await this.fetchAuctions();
-      this.userCreatedAuctions = this.auctions;
-    },
-    */
 
     async fetchUsers() {
       if (this.usersQuery.trim() === '') {

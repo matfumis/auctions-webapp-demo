@@ -75,7 +75,7 @@ button:hover {
 }
 
 .toggle-button {
-    background-color: #6c757d;
+    background-color: #007BFF;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -85,5 +85,5 @@ button:hover {
 }
 
 .toggle-button:hover {
-    background-color: #5a6268;
+    background-color: #0056b3;
 }
