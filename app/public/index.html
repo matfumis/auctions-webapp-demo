@@ -12,7 +12,7 @@
     <!-- Favicon-->
     <link rel="icon" type="image/x-icon" href="assets/money-favicon.ico" />
     <!-- Core theme CSS (includes Bootstrap)-->
-    <link href="css/styles-copy.css" rel="stylesheet" />
+    <link href="css/styles.css" rel="stylesheet" />
   </head>
   <body id="app">
     <div class="d-flex" id="wrapper">
@@ -161,10 +161,9 @@
             you can <strong>search</strong> items of interest by name or
             description and view the <strong>bids history</strong> for each
             auction. <br />
-            <a class="general-link" href="login.html" v-if="!authenticated"
-              >Sign in</a
+            <span v-if="!authenticated"
+              ><a href="login.html">Sign in</a> to bid!</span
             >
-            to bid!
           </p>
 
           <div class="my-div">
@@ -177,6 +176,11 @@
                 />
                 <button type="submit">Search auctions</button>
               </label>
+              <label
+                >Show only open auctions <input
+                  type="checkbox"
+                  v-model="onlyOpenAuctions"
+              /></label>
             </form>
             <ul>
               <li v-for="auction in auctions" :key="auction.id">
@@ -185,9 +189,12 @@
                 Published by: {{ auction.sellerUsername }} <br />
                 Current Price: <strong>{{ auction.currentPrice }} € </strong
                 ><br />
-                Auction ends on: {{ formatDate(auction.endTime) }} <br />
+                {{auction.open ? "Auction ends on: " : "Auction ended on: "}}{{
+                formatDate(auction.endTime) }}
+                <br />
+                <!--Auction ends on: {{ formatDate(auction.endTime) }} <br />-->
                 Status: {{ printStatus(auction.open) }} <br />
-                Won by {{ auction.winner ? auction.winner : " nobody yet"}}
+                {{ auction.winner ? "Won by " + auction.winner : ""}}
                 <br />
 
                 <button @click="toggleBidsHistory(auction.id)">History</button>
