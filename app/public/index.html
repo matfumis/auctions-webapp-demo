@@ -87,7 +87,7 @@
           <p>
             Here you can <strong>check</strong> your personal details,
             <strong>create</strong> new auctions and
-            <strong>manage</strong> auctions you already created
+            <strong>manage</strong> auctions you already created.
           </p>
 
           <div class="my-div">
@@ -123,9 +123,16 @@
             </div>
             <ul>
               <li v-for="auction in userCreatedAuctions" :key="auction.id">
-                {{ auction.title }}<br />
-                {{ auction.description }}<br />
-                <button @click="deleteAuction(auction.id)">Delete</button>
+                <div class="li-content">
+                  <span class="item-title">{{ auction.title }}</span><br />
+                  {{ auction.description }}<br />
+                  Status:
+                  <span :style="{ color: printStatus(auction.open).color }">
+                    {{ printStatus(auction.open).text }}
+                  </span>
+                  <br />
+                </div>
+                <button id="delete-button" @click="deleteAuction(auction.id)">Delete</button>
                 <button @click="toggleEditAuctionForm(auction.id)">Edit</button>
                 <div v-if="showEditAuctionForm">
                   Edit Auction:
@@ -177,26 +184,32 @@
                 <button type="submit">Search auctions</button>
               </label>
               <label
-                >Show only open auctions <input
-                  type="checkbox"
-                  v-model="onlyOpenAuctions"
+                >Show only open auctions
+                <input type="checkbox" v-model="onlyOpenAuctions"
               /></label>
             </form>
             <ul>
               <li v-for="auction in auctions" :key="auction.id">
-                <span id="auction-title">{{ auction.title }}</span><br />
-                {{ auction.description }} <br />
-                Published by: {{ auction.sellerUsername }} <br />
-                Current Price: <strong>{{ auction.currentPrice }} € </strong
-                ><br />
-                {{auction.open ? "Auction ends on: " : "Auction ended on: "}}{{
-                formatDate(auction.endTime) }}
-                <br />
-                <!--Auction ends on: {{ formatDate(auction.endTime) }} <br />-->
-                Status: {{ printStatus(auction.open) }} <br />
-                {{ auction.winner ? "Won by " + auction.winner : ""}}
-                <br />
+                <div class="li-content">
+                  <span class="auction-title">{{ auction.title }}</span><br />
+                  {{ auction.description }} <br />
+                  Published by: {{ auction.sellerUsername }} <br />
+                  Current Price: <strong>{{ auction.currentPrice }} € </strong
+                  ><br />
+                  {{ auction.open ? "Auction ends on: " : "Auction ended on: "
+                  }} {{ formatDate(auction.endTime) }}
+                  <br />
+                  <!--Auction ends on: {{ formatDate(auction.endTime) }} <br />-->
+                  <!--Status: {{ printStatus(auction.open) }} <br /> -->
+                  Status:
+                  <span :style="{ color: printStatus(auction.open).color }">
+                    {{ printStatus(auction.open).text }}
+                  </span>
+                  <br />
 
+                  Won by {{ auction.winner ? auction.winner : " nobody yet"
+                  }}<br />
+                </div>
                 <button @click="toggleBidsHistory(auction.id)">History</button>
 
                 <button
@@ -276,7 +289,8 @@
                   Auctions already won: <br />
                   <ul>
                     <li v-for="bid in user.winningBids">
-                      <strong>{{ bid.item }}</strong><br />
+                      <span class="item-title">{{ bid.item }}</span><br />
+                      <!-- <strong>{{ bid.item }}</strong><br /> -->
                       For {{ bid.amount }} €<br />
                       On: {{ formatDate(bid.timestamp) }}<br />
                     </li>
