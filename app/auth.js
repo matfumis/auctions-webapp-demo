@@ -60,7 +60,7 @@ router.post('/signin', async (req, res) => {
       const data = { id: user.id }
       const token = jwt.sign(data, secret, { expiresIn: 86400 });
       res.cookie("token", token, { httpOnly: true });
-      res.status(200).json({msg: 'Successfully logged in!'})
+      res.status(200).json({msg: 'Successfully signed in!'})
     } else {
       res.status(400).send({msg:'Invalid username or password'});
     }

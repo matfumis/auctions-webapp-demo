@@ -97,6 +97,7 @@
             </p>
             <button @click="toggleNewAuctionForm">New Auction</button>
             <button @click="toggleUserCreatedAuctions">Your Auctions</button>
+            <button class="red-button" @click="signout">Sign Out</button>
             <br />
 
             <div v-if="showNewAuctionForm && !showUserCreatedAuctions">
@@ -125,39 +126,47 @@
 
             <div v-if="showUserCreatedAuctions && !showNewAuctionForm">
               <h2>Auctions created by you</h2>
-            <ul>
-              <li v-for="auction in userCreatedAuctions" :key="auction.id">
-                <div class="li-content">
-                  <span class="item-title">{{ auction.title }}</span><br />
-                  {{ auction.description }}<br />
-                  Status:
-                  <span :style="{ color: printStatus(auction.open).color }">
-                    {{ printStatus(auction.open).text }}
-                  </span>
-                  <br />
-                </div>
-                <button id="delete-button" @click="deleteAuction(auction.id)">Delete</button>
-                <button @click="toggleEditAuctionForm(auction.id)">Edit</button>
-                <div v-if="showEditAuctionForm">
-                  Edit Auction:
-                  <form @submit.prevent="editAuction(auction.id)">
-                    <label
-                      >Title:
-                      <input type="text" v-model="editedAuction.title" required
-                    /></label>
-                    <label
-                      >Description:
+              <ul>
+                <li v-for="auction in userCreatedAuctions" :key="auction.id">
+                  <div class="li-content">
+                    <span class="item-title">{{ auction.title }}</span><br />
+                    {{ auction.description }}<br />
+                    Status:
+                    <span :style="{ color: printStatus(auction.open).color }">
+                      {{ printStatus(auction.open).text }}
+                    </span>
+                    <br />
+                  </div>
+                  <button class="red-button" @click="deleteAuction(auction.id)">
+                    Delete
+                  </button>
+                  <button @click="toggleEditAuctionForm(auction.id)">
+                    Edit
+                  </button>
+                  <div v-if="showEditAuctionForm">
+                    <br />
+                    Edit Auction:
+                    <form @submit.prevent="editAuction(auction.id)">
+                      <label>Title: </label>
                       <input
                         type="text"
+                        v-model="editedAuction.title"
+                        required
+                      /><br />
+                      <label>Description: </label>
+
+                      <textarea
+                        maxlength="200"
                         v-model="editedAuction.description"
                         required
-                    /></label>
-                    <button type="submit">Edit</button>
-                  </form>
-                </div>
-              </li>
-            </ul>
-          </div>
+                      ></textarea>
+                      <br />
+                      <button type="submit">Submit</button>
+                    </form>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
@@ -262,8 +271,8 @@
           <h1 class="mt-4">Community</h1>
           <p>
             Here you can search for other <strong>users</strong> and discover
-            more about them; the search can be made by username, name or
-            surname (by default all users are shown).
+            more about them; the search can be made by username, name or surname
+            (by default all users are shown).
           </p>
 
           <div class="my-div">

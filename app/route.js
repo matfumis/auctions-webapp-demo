@@ -152,7 +152,7 @@ router.get('/users/:id', updateAuctionStatus, async (req, res) => {
   try {
     const user = await req.db.collection('users').findOne({ id: parseInt(req.params.id) });
 
-    if(!user){
+    if (!user) {
       return res.status(400).json({ msg: 'User not found' });
     }
     const { username, name, surname, winningBids } = user;
@@ -358,6 +358,15 @@ router.post('/auctions/:id/bids', verifyAuthentication, verifyAuctionStatus, ver
   }
 });
 
+router.post('/signout', verifyAuthentication, (req, res) => {
+  try {
+    res.clearCookie("token", { httpOnly: true });
+    res.status(200).json({ msg: 'Successfully signed out!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500);
+  }
+});
 
 const generateId = () => Math.floor(10000 + Math.random() * 90000);
 

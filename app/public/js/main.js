@@ -140,15 +140,15 @@ const app = createApp({
       this.showSignupForm = !this.showSignupForm;
     },
 
-
-    signup() {
-      fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(this.signupData)
-      }).then(async res => {
+    async signup() {
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(this.signupData)
+        });
         const { msg } = await res.json();
         if (res.ok) {
           alert(msg);
@@ -158,41 +158,45 @@ const app = createApp({
           alert('Some fields are not valid');
           this.signupData = {};
         }
-      }).catch(err => {
+      } catch (err) {
         console.log(err);
-      })
+        this.signupData = {};
+      }
     },
 
-    signin() {
-      fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(this.signinData)
-      }).then(async res => {
+    async signin() {
+      try {
+        const res = await fetch('/api/auth/signin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(this.signinData)
+        });
         const { msg } = await res.json();
         if (res.ok) {
           this.authenticated = true;
           this.toggleLoginForm();
           this.signinData = {};
           alert(msg);
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => setTimeout(resolve, 200));
           window.location.href = "/";
         } else {
           alert(msg);
           this.signinData = {};
         }
-      }).catch(err => {
+      } catch (err) {
         console.log(err);
-      })
+        this.signinData = {};
+      }
     },
 
-    fetchUserInfo() {
-      fetch('/api/whoami', {
-        method: 'GET',
-        credentials: 'include'
-      }).then(async res => {
+    async fetchUserInfo() {
+      try {
+        const res = await fetch('/api/whoami', {
+          method: 'GET',
+          credentials: 'include'
+        });
         if (res.ok) {
           this.authenticated = true;
           this.userInfo = await res.json();
@@ -200,75 +204,80 @@ const app = createApp({
           this.authenticated = false;
           this.userInfo = {};
         }
-      }).catch(err => {
+      } catch (err) {
         console.log(err);
-      })
+      }
+
     },
 
-    fetchAuctions() {
-      if (this.auctionsQuery === '') {
-        fetch('/api/auctions', {
-          method: 'GET'
-        }).then(async res => {
+    async fetchAuctions() {
+      try {
+        if (this.auctionsQuery === '') {
+          const res = await fetch('/api/auctions', {
+            method: 'GET'
+          });
           let data = await res.json();
           if (this.onlyOpenAuctions) {
             this.auctions = data.filter(auction => auction.open === true);
           } else {
             this.auctions = data;
           }
-        }).catch(err => {
-          console.log(err);
-        })
-      } else {
-        fetch(`/api/auctions?q=${encodeURIComponent(this.auctionsQuery)}`, {
-          method: 'GET'
-        }).then(async res => {
-          this.auctions = await res.json();
-          this.auctionsQuery = '';
-        }).catch(err => {
-          console.log(err);
-        });
+        }
+        else {
+          const res = await fetch(`/api/auctions?q=${encodeURIComponent(this.auctionsQuery)}`, {
+            method: 'GET'
+          });
+          let data = await res.json();
+          if (this.onlyOpenAuctions) {
+            this.auctions = data.filter(auction => auction.open === true);
+            this.auctionsQuery = '';
+          } else {
+            this.auctions = data;
+            this.auctionsQuery = '';
+          }
+        }
+      } catch (err) {
+        console.log(err);
       }
     },
 
     async fetchUserCreatedAuctions() {
-      const userAuctionsResponse = await fetch(`/api/auctions?q=${encodeURIComponent(this.userInfo.id)}`, {
+      const res = await fetch(`/api/auctions?q=${encodeURIComponent(this.userInfo.id)}`, {
         method: 'GET'
       });
-      this.userCreatedAuctions = await userAuctionsResponse.json();
+      this.userCreatedAuctions = await res.json();
       this.fetchAuctions();
     },
 
-    fetchUsers() {
-      if (this.usersQuery.trim() === '') {
-        fetch('/api/users', {
-          method: 'GET'
-        }).then(async res => {
+    async fetchUsers() {
+      try {
+        if (this.usersQuery.trim() === '') {
+          const res = await fetch('/api/users', {
+            method: 'GET'
+          });
           this.users = await res.json();
-        }).catch(err => {
-          console.log(err);
-        });
-      } else {
-        fetch(`/api/users?q=${encodeURIComponent(this.usersQuery)}`, {
-          method: 'GET'
-        }).then(async res => {
+        } else {
+          const res = await fetch(`/api/users?q=${encodeURIComponent(this.usersQuery)}`, {
+            method: 'GET'
+          });
           this.users = await res.json();
           this.usersQuery = '';
-        }).catch(err => {
-          console.log(err);
-        });
+        }
+      } catch (err) {
+        console.log(err);
       }
     },
 
-    createAuction() {
-      fetch('/api/auctions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(this.newAuction)
-      }).then(async res => {
+    async createAuction() {
+      try {
+        const res = await fetch('/api/auctions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(this.newAuction)
+        });
         const { msg } = await res.json();
         if (res.ok) {
           alert(msg);
@@ -278,16 +287,17 @@ const app = createApp({
         } else {
           alert(msg);
         }
-      }).catch(err => {
+      } catch (err) {
         console.log(err);
-      });
+      }
     },
 
-    deleteAuction(id) {
-      fetch(`/api/auctions/${id}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      }).then(async res => {
+    async deleteAuction(id) {
+      try {
+        const res = await fetch(`/api/auctions/${id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
         const { msg } = await res.json();
         if (res.ok) {
           alert(msg);
@@ -295,42 +305,44 @@ const app = createApp({
         } else {
           alert(msg);
         }
-      }).catch(err => {
+      } catch (err) {
         console.log(err);
-      })
+      }
     },
 
-
-    editAuction(id) {
-      fetch(`/api/auctions/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(this.editedAuction)
-      }).then(async res => {
+    async editAuction(id) {
+      try {
+        const res = await fetch(`/api/auctions/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(this.editedAuction)
+        });
         const { msg } = await res.json();
         if (res.ok) {
           await this.fetchUserCreatedAuctions();
           alert(msg);
           this.toggleEditAuctionForm(id);
-
+        } else {
+          alert(msg);
         }
-      }).catch(err => {
+      } catch (err) {
         console.log(err);
-      })
+      }
     },
 
-    makeNewBid() {
-      fetch(`/api/auctions/${encodeURIComponent(this.selectedAuction)}/bids`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(this.newBid)
-      }).then(async res => {
+    async makeNewBid() {
+      try {
+        const res = await fetch(`/api/auctions/${encodeURIComponent(this.selectedAuction)}/bids`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(this.newBid)
+        });
         const { msg } = await res.json();
         if (res.ok) {
           alert(msg);
@@ -342,10 +354,27 @@ const app = createApp({
           this.newBid.amount = '';
           await this.fetchAuctions();
         }
-      }).catch(err => {
+      } catch (err) {
         console.log(err);
-      })
+      }
     },
+
+    async signout() {
+      try {
+        const res = await fetch(`api/signout`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        this.userInfo = {};
+        this.authenticated = false;
+        alert('Successfully signed out!');
+        await new Promise(resolve => setTimeout(resolve, 200));
+        window.location.href = "/";
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
 
     formatDate(dateString) {
       const date = new Date(dateString);
