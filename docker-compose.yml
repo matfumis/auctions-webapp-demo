@@ -1,6 +1,6 @@
 services:
   app:
-    container_name: app_auctions
+    container_name: fumis_auctions_app
     build: .
     command: nodemon --watch /usr/src/app -e js app.js
     ports:
@@ -10,7 +10,7 @@ services:
     links:
       - "mongo:mongosrv"
   mongo:
-    container_name: mongo_auctions
+    container_name: fumis_mongo_auctions
     image: mongo
     volumes:
       - ./data:/data/db

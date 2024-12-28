@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
 const router = express.Router();
 const db = require("./db.js");
 const jwt = require('jsonwebtoken');
@@ -22,12 +23,15 @@ router.post('/signup', verifySignupValidity, async (req, res) => {
   try {
     const mongo = await db.connectToDb();
     if (await isUsernameUnique(req.body.username, mongo)) {
+
+      const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
       const user = {
         id: generateId(),
         name: req.body.name,
         surname: req.body.surname,
         username: req.body.username,
-        password: req.body.password,
+        password: hashedPassword,
         winningBids: []
       }
       await mongo.collection("users").insertOne(user);
@@ -36,7 +40,7 @@ router.post('/signup', verifySignupValidity, async (req, res) => {
         surname: user.surname,
         username: user.username
       }
-      res.status(200).json({msg: 'User succesfully created!', user: userData});
+      res.status(200).json({msg: 'Successfully signed up!', user: userData});
     } else {
       res.status(400).json({msg: 'Username already taken'});
     }
@@ -52,7 +56,7 @@ router.post('/signin', async (req, res) => {
     const mongo = await db.connectToDb();
     const user = await mongo.collection("users").findOne({ username: username });
 
-    if (await areUsernameAndPasswordValid(username, password, mongo)) {
+    if (user && await bcrypt.compare(password, user.password)) {
       const data = { id: user.id }
       const token = jwt.sign(data, secret, { expiresIn: 86400 });
       res.cookie("token", token, { httpOnly: true });
@@ -72,12 +76,6 @@ async function isUsernameUnique(username, mongo) {
   const cursor = await mongo.collection("users").findOne({ username: username });
   return !cursor;
 }
-
-async function areUsernameAndPasswordValid(username, password, mongo) {
-  const cursor = await mongo.collection("users").findOne({ username: username, password: password });
-  return !!cursor;
-}
-
 
 const generateId = () => Math.floor(10000 + Math.random() * 90000);
 

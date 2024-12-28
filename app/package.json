@@ -8,13 +8,13 @@
   },
   "private": true,
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.21.1",
     "luxon": "^3.5.0",
     "mongodb": "^6.11.0"
   },
   "devDependencies": {
     "cookie-parser": "^1.4.7",
-    "jsonwebtoken": "^9.0.2",
-    "passport": "^0.7.0"
+    "jsonwebtoken": "^9.0.2"
   }
 }
