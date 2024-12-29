@@ -8,26 +8,26 @@ Ensure you have [Docker](https://www.docker.com/) installed on your system befor
 ## Getting Started
 
 1. **Clone the repository**  
-<br>
+
    Clone the repository:
    ```bash
    git clone https://github.com/matfumis/auctions-webapp
   ```
 
 2. **Build the Docker container**
-<br>
+
   Navigate to the project directory and build the Docker container:
   ```bash
   docker compose build
   ```
 
 3. **Start the Docker container**
-<br>
+
   Start the container to launch the web application:
   ```bash
   docker compose up
   ```
 
 4. **Access the application**
-<br>
+
 Open your browser and navigate to http://localhost:8000 to use the web app
