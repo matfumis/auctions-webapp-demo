@@ -2,6 +2,7 @@ services:
   app:
     container_name: fumis_auctions
     build: .
+    command: nodemon --watch /usr/src/app -e js app.js
     ports:
       - "8000:8000"
     volumes:
