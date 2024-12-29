@@ -3,7 +3,6 @@ services:
     container_name: fumis_auctions
     build: .
     command: nodemon --watch /usr/src/app -e js app.js
-    command: npm install
     ports:
       - "8000:8000"
     links:
