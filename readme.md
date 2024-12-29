@@ -10,11 +10,11 @@ Ensure you have [Docker](https://www.docker.com/) installed on your system befor
 
 1. **Clone the repository**
 
-   Clone the repository:
+Clone the repository:
 
-   ```bash
-   git clone https://github.com/matfumis/auctions-webapp
-   ```
+```bash
+git clone https://github.com/matfumis/auctions-webapp
+```
 
 2. **Build the Docker container**
 
