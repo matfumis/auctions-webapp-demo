@@ -50,8 +50,9 @@ const updateAuctionStatus = async (req, res, next) => {
           timestamp: highestBid.timestamp,
         }
 
-        const winner = await req.db.collection('users').findOne({ username: winnerUsername });
+        // const winner = await req.db.collection('users').findOne({ username: winnerUsername });
         if (winnerUsername !== auction.sellerUsername) {
+          const winner = await req.db.collection('users').findOne({ username: winnerUsername });
           winner.winningBids.push(winningBid);
           await req.db.collection('users').updateOne({ username: winnerUsername }, { $push: { winningBids: winningBid } });
         }
@@ -212,8 +213,6 @@ router.get('/auctions/:id', updateAuctionStatus, async (req, res) => {
     if (!auction) {
       return res.status(400).json({ msg: 'Auction not found' });
     }
-    //const { id, title, description, sellerId, status } = auction;
-    //res.status(200).json({ id, title, description, sellerId, status });
     res.status(200).json(auction);
   } catch (err) {
     console.error(err);
@@ -228,11 +227,8 @@ router.get('/auctions/:id/bids', async (req, res) => {
     if (!auction) {
       return res.status(400).json({ msg: 'Auction not found' });
     }
-
-    const { bids } = auction;
-    const sortedBids = bids.sort({ amount: -1 }).toArray();
-    res.status(200).json(sortedBids);
-    // res.json({bids});
+    const { bidsHistory } = auction;
+    res.json(bidsHistory);
   } catch (err) {
     console.error(err);
     res.status(500);
@@ -256,7 +252,14 @@ router.get('/whoami', verifyAuthentication, async (req, res) => {
   try {
     const { id } = jwt.decode(req.cookies.token);
     const user = await req.db.collection('users').findOne({ id: parseInt(id) });
-    res.status(200).json(user);
+    userData = {
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      surname: user.surname,
+      winningBids: user.winningBids
+    }
+    res.status(200).json(userData);
   } catch (err) {
     console.error(err);
     res.status(500);
@@ -325,8 +328,6 @@ router.delete('/auctions/:id', verifyAuthentication, verifyAuthorization, async 
     res.status(500);
   }
 });
-
-
 
 router.post('/auctions/:id/bids', verifyAuthentication, verifyAuctionStatus, verifyBidValidity, async (req, res) => {
   try {

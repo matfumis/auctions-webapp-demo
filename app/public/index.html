@@ -79,7 +79,7 @@
 
         <!-- Personal Area-->
 
-        <div class="container-fluid" v-if="showPersonalArea">
+        <div class="container-fluid" v-if="showPersonalArea && authenticated">
           <h1 class="mt-4">{{ userInfo.username }}'s personal area</h1>
           <p>
             Here you can <strong>check</strong> your personal details,
@@ -218,8 +218,10 @@
                   </span>
                   <br />
 
-                  Won by {{ auction.winner ? auction.winner : " nobody yet"
-                  }}<br />
+                  <!-- Won by {{ auction.winner ? auction.winner : " nobody yet" }}-->
+                   Won by {{ printWinner(auction.winner, auction.sellerUsername,
+                  auction.open) }} 
+                  <br />
                 </div>
                 <button @click="toggleBidsHistory(auction.id)">History</button>
 

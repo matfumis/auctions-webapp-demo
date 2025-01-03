@@ -206,6 +206,8 @@ const app = createApp({
         }
       } catch (err) {
         console.log(err);
+        this.authenticated = false;
+        this.userInfo = {};
       }
 
     },
@@ -398,6 +400,23 @@ const app = createApp({
         text: status ? 'open' : 'expired',
         color: status ? 'green' : 'red',
       };
+    },
+
+    printWinner(winner, seller, isOpen) {
+      try {
+        if (!winner && isOpen) {
+          return 'nobody yet';
+        }
+        if ((!winner || winner === seller) && !isOpen) {
+          return 'nobody';
+        }
+        else {
+          return winner;
+        }
+      }
+      catch {
+        console.log(err);
+      }
     }
   }
 });

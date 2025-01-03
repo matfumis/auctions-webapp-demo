@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken');
 
 const secret = 'secret';
 
-
 const verifySignupValidity = async (req, res, next) => {
   if (!req.body.username || req.body.username.trim() === "" ||
     !req.body.name || req.body.name.trim() === "" ||
@@ -17,7 +16,6 @@ const verifySignupValidity = async (req, res, next) => {
   }
   next();
 }
-
 
 router.post('/signup', verifySignupValidity, async (req, res) => {
   try {
@@ -71,13 +69,11 @@ router.post('/signin', async (req, res) => {
   }
 });
 
-
 async function isUsernameUnique(username, mongo) {
   const cursor = await mongo.collection("users").findOne({ username: username });
   return !cursor;
 }
 
 const generateId = () => Math.floor(10000 + Math.random() * 90000);
-
 
 module.exports = router;

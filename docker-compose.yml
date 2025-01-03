@@ -1,14 +1,16 @@
 services:
   app:
-    container_name: fumis_auctions
+    container_name: fumis_auctions_app
     build: .
     command: bash -c "nodemon --watch /usr/src/app -e js app.js && node utils/populateDb.js"
     ports:
       - "8000:8000"
+    volumes:
+      - ./app:/usr/src/app
     links:
       - "mongo:mongosrv"
   mongo:
-    container_name: fumis_mongo
+    container_name: fumis_mongodb
     image: mongo
     volumes:
       - ./data:/data/db

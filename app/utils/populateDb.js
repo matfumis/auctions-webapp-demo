@@ -3,10 +3,16 @@ const { DateTime } = require("luxon");
 const database = require("../db.js");
 
 module.exports = {
-  
+
   seedData: async () => {
     try {
       const db = await database.connectToDb();
+
+      const usersCounter = await database.collection("users").countDocuments();
+      const auctionsCounter = await database.collection("auctions").countDocuments();
+      if (usersCounter > 0 || auctionsCounter > 0) {
+        return;
+      }
 
       const usersCollection = db.collection("users");
       const auctionsCollection = db.collection("auctions");
