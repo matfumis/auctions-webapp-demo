@@ -3,14 +3,12 @@ const router = express.Router();
 const db = require("./db.js");
 const jwt = require("jsonwebtoken");
 const secret = 'secret';
-
 const { DateTime } = require('luxon');
-
 
 router.use(async (req, res, next) => {
   try {
-    req.db = await db.connectToDb(); // questo middleware, messo per primo, viene sempre eseguito e "incorpora" la connessione nella richiesta (ottimizzazione)
-    next(); // necessario sennò non viene eseguito nulla
+    req.db = await db.connectToDb(); 
+    next(); 
   } catch (err) {
     console.error(err);
     res.status(500);
