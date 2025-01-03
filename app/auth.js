@@ -6,13 +6,10 @@ const jwt = require('jsonwebtoken');
 
 const secret = 'secret';
 
+
 const verifySignupValidity = async (req, res, next) => {
-  if (!req.body.username || req.body.username.trim() === "" ||
-    !req.body.name || req.body.name.trim() === "" ||
-    !req.body.surname || req.body.surname.trim() === "" ||
-    !req.body.password || req.body.password.trim() === ""
-  ) {
-    return res.status(400).json({msg: 'Some fields are invalid', body: req.body});
+  if (!req.body.username.trim() || !req.body.name.trim() || !req.body.surname.trim() || !req.body.password.trim()) {
+    return res.status(400).json({ msg: 'Some fields are invalid', body: req.body });
   }
   next();
 }
@@ -38,13 +35,13 @@ router.post('/signup', verifySignupValidity, async (req, res) => {
         surname: user.surname,
         username: user.username
       }
-      res.status(200).json({msg: 'Successfully signed up! Now you can sign in', user: userData});
+      res.status(200).json({ msg: 'Successfully signed up! Now you can sign in', user: userData });
     } else {
-      res.status(400).json({msg: 'Username already taken'});
+      res.status(400).json({ msg: 'Username already taken' });
     }
   } catch (err) {
     console.error(err)
-    res.status(500).json({msg: 'Server error'});
+    res.status(500).json({ msg: 'Server error' });
   }
 });
 
@@ -58,9 +55,9 @@ router.post('/signin', async (req, res) => {
       const data = { id: user.id }
       const token = jwt.sign(data, secret, { expiresIn: 86400 });
       res.cookie("token", token, { httpOnly: true });
-      res.status(200).json({msg: 'Successfully signed in!'})
+      res.status(200).json({ msg: 'Successfully signed in!' })
     } else {
-      res.status(400).send({msg:'Invalid username or password'});
+      res.status(400).send({ msg: 'Invalid username or password' });
     }
 
   } catch (err) {

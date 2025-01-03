@@ -50,7 +50,6 @@ const updateAuctionStatus = async (req, res, next) => {
           timestamp: highestBid.timestamp,
         }
 
-        // const winner = await req.db.collection('users').findOne({ username: winnerUsername });
         if (winnerUsername !== auction.sellerUsername) {
           const winner = await req.db.collection('users').findOne({ username: winnerUsername });
           winner.winningBids.push(winningBid);
@@ -122,15 +121,27 @@ const verifyAuctionValidity = async (req, res, next) => {
     const now = DateTime.now().setZone('Europe/Rome');
     const endTime = DateTime.fromISO(req.body.endTime, { zone: 'Europe/Rome' });
     const startPrice = req.body.startPrice;
-    if (endTime < now || startPrice <= 0) {
+    if (endTime < now || startPrice <= 0 || !req.body.title.trim() || !req.body.description.trim()) {
       return res.status(401).json({ msg: 'The auction is not valid' });
     }
     next();
   } catch (err) {
-    console.error(err);
+    console.log(err);
     res.status(500);
   }
 }
+
+const verifyAuctionUpdateValidity = (req, res, next) => {
+  try{
+    if(!req.body.title.trim() || !req.body.description.trim()){
+      return res.status(401).json({msg:'The auction update is not valid'})
+    }
+    next();
+  } catch(err){
+    console.error(err);
+    res.status(500);
+  }
+} 
 
 const verifyAuthorization = async (req, res, next) => {
   try {
@@ -294,7 +305,7 @@ router.post('/auctions', verifyAuthentication, verifyAuctionValidity, async (req
 
 });
 
-router.put('/auctions/:id', verifyAuthentication, verifyAuthorization, async (req, res) => {
+router.put('/auctions/:id', verifyAuthentication, verifyAuthorization, verifyAuctionUpdateValidity, async (req, res) => {
   try {
     const auction = req.db.collection('auctions').findOne({ id: parseInt(req.params.id) });
 
