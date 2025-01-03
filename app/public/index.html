@@ -123,6 +123,7 @@
 
             <div v-if="showUserCreatedAuctions && !showNewAuctionForm">
               <h2>Auctions created by you</h2>
+              <div v-if="userCreatedAuctions.length === 0"><strong>No auctions to show</strong></div>
               <ul>
                 <li v-for="auction in userCreatedAuctions" :key="auction.id">
                   <div class="li-content">
@@ -199,6 +200,7 @@
                 <input type="checkbox" v-model="onlyOpenAuctions"
               /></label>
             </form>
+            <div v-if="auctions.length === 0"><strong>No auctions to show</strong></div>
             <ul>
               <li v-for="auction in auctions" :key="auction.id">
                 <div class="li-content">
@@ -231,8 +233,9 @@
                 >
                   Bid
                 </button>
-
                 <div v-if="showBidsHistory && selectedAuction === auction.id">
+                  <div v-if="auction.bidsHistory.length === 0"><br/><strong>No bids to show</strong></div>
+                  
                   <ul>
                     <li v-for="bid in auction.bidsHistory" :key="bid.id">
                       Bidder: {{ bid.bidder }} <br />
@@ -285,6 +288,7 @@
                 <button type="submit">Search users</button>
               </label>
             </form>
+            <div v-if="users.length === 0"><strong>No users to show</strong></div>
             <ul>
               <li v-for="user in users" :key="user.id">
                 <button
@@ -294,16 +298,14 @@
                   {{ user.username }}</button
                 ><br />
 
-                <!-- <button class="about-button" @click="toggleMoreUserInfo(user.id)">About</button> -->
-
                 <div v-if="user.id === selectedUserId">
                   Name: {{ user.name }} <br />
                   Surname: {{ user.surname }} <br />
                   Auctions already won: <br />
+                  <div v-if="user.winningBids.length === 0"><strong>This user hasn't won any auction</strong></div>
                   <ul>
                     <li v-for="bid in user.winningBids">
                       <span class="item-title">{{ bid.item }}</span><br />
-                      <!-- <strong>{{ bid.item }}</strong><br /> -->
                       For {{ bid.amount }} €<br />
                       On: {{ formatDate(bid.timestamp) }}<br />
                     </li>
