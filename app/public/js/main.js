@@ -115,9 +115,9 @@ const app = createApp({
     },
 
     togglePersonalArea() {
-      this.showPersonalArea = !this.showPersonalArea;
+      this.showPersonalArea = true 
       this.showUsersArea = false;
-      this.showAuctionsArea = true
+      this.showAuctionsArea = false;
     },
 
     toggleAuctionsArea() {
@@ -127,9 +127,9 @@ const app = createApp({
     },
 
     toggleUsersArea() {
-      this.showUsersArea = !this.showUsersArea;
+      this.showUsersArea = true;
       this.showPersonalArea = false;
-      this.showAuctionsArea = true
+      this.showAuctionsArea = false;
     },
 
     toggleMoreUserInfo(userId) {

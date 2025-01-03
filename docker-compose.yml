@@ -5,8 +5,6 @@ services:
     command: bash -c "nodemon --watch /usr/src/app -e js app.js && node utils/populateDb.js"
     ports:
       - "8000:8000"
-    volumes:
-      - ./app:/usr/src/app
     links:
       - "mongo:mongosrv"
   mongo:
