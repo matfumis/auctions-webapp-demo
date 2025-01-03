@@ -38,7 +38,7 @@ router.post('/signup', verifySignupValidity, async (req, res) => {
         surname: user.surname,
         username: user.username
       }
-      res.status(200).json({msg: 'Successfully signed up!', user: userData});
+      res.status(200).json({msg: 'Successfully signed up! Now you can sign in', user: userData});
     } else {
       res.status(400).json({msg: 'Username already taken'});
     }

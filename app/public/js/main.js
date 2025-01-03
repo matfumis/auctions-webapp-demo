@@ -1,4 +1,4 @@
-const { createApp } = Vue
+const { createApp } = Vue;
 
 const app = createApp({
 
@@ -151,11 +151,21 @@ const app = createApp({
         });
         const { msg } = await res.json();
         if (res.ok) {
-          alert(msg);
+          Swal.fire({
+            Title: 'Success!',
+            icon: 'success',
+            text: msg,
+            confirmButtonText: 'Ok'
+          });
           this.showSignupForm = false;
           this.signupData = {};
         } else {
-          alert('Some fields are not valid');
+          Swal.fire({
+            Title: 'Oops!',
+            icon: 'error',
+            text: 'Some fields are not valid',
+            confirmButtonText: 'Ok'
+          });
           this.signupData = {};
         }
       } catch (err) {
@@ -178,11 +188,21 @@ const app = createApp({
           this.authenticated = true;
           this.toggleLoginForm();
           this.signinData = {};
-          alert(msg);
-          await new Promise(resolve => setTimeout(resolve, 200));
+          Swal.fire({
+            title: 'Success!',
+            icon: 'success',
+            text: msg,
+            showConfirmButton: false,
+          });
+          await new Promise(resolve => setTimeout(resolve, 1300));
           window.location.href = "/";
         } else {
-          alert(msg);
+          Swal.fire({
+            title: 'Oops!',
+            icon: 'error',
+            text: msg,
+            confirmButtonText: 'Ok'
+          });
           this.signinData = {};
         }
       } catch (err) {
@@ -282,12 +302,22 @@ const app = createApp({
         });
         const { msg } = await res.json();
         if (res.ok) {
-          alert(msg);
+          Swal.fire({
+            title: 'Success!',
+            icon: 'success',
+            text: msg,
+            confirmButtonText: 'Ok'
+          });
           await this.fetchAuctions();
           this.toggleNewAuctionForm();
           this.newAuction = {};
         } else {
-          alert(msg);
+          Swal.fire({
+            title: 'Oops!',
+            icon: 'error',
+            text: msg,
+            confirmButtonText: 'Ok'
+          });
         }
       } catch (err) {
         console.log(err);
@@ -302,10 +332,20 @@ const app = createApp({
         });
         const { msg } = await res.json();
         if (res.ok) {
-          alert(msg);
+          Swal.fire({
+            title: 'Success!',
+            icon: 'success',
+            text: msg,
+            confirmButtonText: 'Ok'
+          });
           await this.fetchUserCreatedAuctions();
         } else {
-          alert(msg);
+          Swal.fire({
+            title: 'Oops!',
+            icon: 'error',
+            text: msg,
+            confirmButtonText: 'Ok'
+          });
         }
       } catch (err) {
         console.log(err);
@@ -325,10 +365,20 @@ const app = createApp({
         const { msg } = await res.json();
         if (res.ok) {
           await this.fetchUserCreatedAuctions();
-          alert(msg);
+          Swal.fire({
+            title: 'Success!',
+            icon: 'success',
+            text: msg,
+            confirmButtonText: 'Ok'
+          });
           this.toggleEditAuctionForm(id);
         } else {
-          alert(msg);
+          Swal.fire({
+            title: 'Oops!',
+            icon: 'error',
+            text: msg,
+            confirmButtonText: 'Ok'
+          });
         }
       } catch (err) {
         console.log(err);
@@ -347,12 +397,22 @@ const app = createApp({
         });
         const { msg } = await res.json();
         if (res.ok) {
-          alert(msg);
+          Swal.fire({
+            title: 'Success!',
+            icon: 'success',
+            text: msg,
+            confirmButtonText: 'Ok'
+          });
           this.toggleNewBidForm();
           this.newBid.amount = '';
           await this.fetchAuctions();
         } else {
-          alert(msg);
+          Swal.fire({
+            title: 'Oops!',
+            icon: 'error',
+            text: msg,
+            confirmButtonText: 'Ok'
+          });
           this.newBid.amount = '';
           await this.fetchAuctions();
         }
@@ -367,11 +427,27 @@ const app = createApp({
           method: 'POST',
           credentials: 'include'
         });
-        this.userInfo = {};
-        this.authenticated = false;
-        alert('Successfully signed out!');
-        await new Promise(resolve => setTimeout(resolve, 200));
-        window.location.href = "/";
+        const {msg} = await res.json();
+        if (res.ok) {
+          this.userInfo = {};
+          this.authenticated = false;
+          Swal.fire({
+            title: 'Success!',
+            icon: 'success',
+            text: msg,
+            showConfirmButton: false
+          });
+          await new Promise(resolve => setTimeout(resolve, 1300));
+          window.location.href = "/";
+        }
+        else {
+          Swal.fire({
+            title: 'Oops!',
+            icon: 'error',
+            text: msg,
+            confirmButtonText: 'Ok'
+          });
+        }
       } catch (err) {
         console.log(err);
       }

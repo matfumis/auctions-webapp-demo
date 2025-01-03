@@ -194,6 +194,9 @@
   .red-button {
     background-color: red;
   }
+  .red-button:hover {
+    background-color: darkred;
+  }
 }
 
 body {

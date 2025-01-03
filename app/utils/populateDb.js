@@ -8,8 +8,8 @@ module.exports = {
     try {
       const db = await database.connectToDb();
 
-      const usersCounter = await database.collection("users").countDocuments();
-      const auctionsCounter = await database.collection("auctions").countDocuments();
+      const usersCounter = await db.collection("users").countDocuments();
+      const auctionsCounter = await db.collection("auctions").countDocuments();
       if (usersCounter > 0 || auctionsCounter > 0) {
         return;
       }
