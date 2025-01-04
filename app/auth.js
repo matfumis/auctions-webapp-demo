@@ -9,7 +9,12 @@ const secret = 'secret';
 
 const verifySignupValidity = async (req, res, next) => {
   if (!req.body.username.trim() || !req.body.name.trim() || !req.body.surname.trim() || !req.body.password.trim()) {
-    return res.status(400).json({ msg: 'Some fields are invalid', body: req.body });
+    return res.status(400).json({ msg: 'Some fields are invalid' });
+  }
+  const mongo = await db.connectToDb();
+  const cursor = await mongo.collection("users").findOne({ username: req.body.username });
+  if (cursor) {
+    return res.status(400).json({ msg: 'Username already taken' });
   }
   next();
 }
@@ -17,28 +22,25 @@ const verifySignupValidity = async (req, res, next) => {
 router.post('/signup', verifySignupValidity, async (req, res) => {
   try {
     const mongo = await db.connectToDb();
-    if (await isUsernameUnique(req.body.username, mongo)) {
+    
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-      const hashedPassword = await bcrypt.hash(req.body.password, 10);
-
-      const user = {
-        id: generateId(),
-        name: req.body.name,
-        surname: req.body.surname,
-        username: req.body.username,
-        password: hashedPassword,
-        winningBids: []
-      }
-      await mongo.collection("users").insertOne(user);
-      const userData = {
-        name: user.name,
-        surname: user.surname,
-        username: user.username
-      }
-      res.status(200).json({ msg: 'Successfully signed up! Now you can sign in', user: userData });
-    } else {
-      res.status(400).json({ msg: 'Username already taken' });
+    const user = {
+      id: generateId(),
+      name: req.body.name,
+      surname: req.body.surname,
+      username: req.body.username,
+      password: hashedPassword,
+      winningBids: []
     }
+    await mongo.collection("users").insertOne(user);
+    const userData = {
+      name: user.name,
+      surname: user.surname,
+      username: user.username
+    }
+    res.status(200).json({ msg: 'Successfully signed up! Now you can sign in', user: userData });
+
   } catch (err) {
     console.error(err)
     res.status(500).json({ msg: 'Server error' });
@@ -65,11 +67,6 @@ router.post('/signin', async (req, res) => {
     res.status(500).json('Server error');
   }
 });
-
-async function isUsernameUnique(username, mongo) {
-  const cursor = await mongo.collection("users").findOne({ username: username });
-  return !cursor;
-}
 
 const generateId = () => Math.floor(10000 + Math.random() * 90000);
 

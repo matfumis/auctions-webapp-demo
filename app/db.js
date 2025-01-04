@@ -14,7 +14,7 @@ module.exports = {
             cachedDB = client.db('auctions_db');
             return cachedDB;
         } catch(err){
-            console.log('Error');
+            console.err('Error');
             return null;
         }
     }

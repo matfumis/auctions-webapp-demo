@@ -163,7 +163,7 @@ const app = createApp({
           Swal.fire({
             Title: 'Oops!',
             icon: 'error',
-            text: 'Some fields are not valid',
+            text: msg,
             confirmButtonText: 'Ok'
           });
           this.signupData = {};
@@ -452,7 +452,6 @@ const app = createApp({
         console.log(err);
       }
     },
-
 
     formatDate(dateString) {
       const date = new Date(dateString);

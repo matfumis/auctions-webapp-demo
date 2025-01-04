@@ -8,7 +8,7 @@ const { DateTime } = require('luxon');
 router.use(async (req, res, next) => {
   try {
     req.db = await db.connectToDb(); 
-    next(); 
+    next();
   } catch (err) {
     console.error(err);
     res.status(500);
@@ -149,7 +149,7 @@ const verifyAuthorization = async (req, res, next) => {
     const requestingUserId = parseInt(id);
     const auctionSellerId = parseInt(auction.sellerId);
     if (requestingUserId !== auctionSellerId) {
-      return res.status(401).json({ msg: 'Unauthorized' });
+      return res.status(403).json({ msg: 'Unauthorized' });
     }
     next();
   } catch (err) {
