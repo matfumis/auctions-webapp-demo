@@ -12,7 +12,7 @@ Ensure you have [Docker](https://www.docker.com/) installed on your system befor
 
 
 ```bash
-git clone https://github.com/matfumis/auctions-webapp
+git clone https://github.com/matfumis/fumis-auctions-webapp
 ```
 
 2. **Build the Docker container**
