@@ -2,6 +2,8 @@
 
 AuctionSpace is a simple and user-friendly web application for hosting and participating in online auctions. Follow the steps below to get started quickly.
 
+![alt text](preview.png)
+
 ## Prerequisites
 
 Ensure you have [Docker](https://www.docker.com/) installed on your system before proceeding.
